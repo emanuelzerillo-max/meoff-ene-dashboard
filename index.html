@@ -840,7 +840,7 @@ function renderGeo(rows) {
 
   // ── tabla distribución: % de nuevas y % de recurrentes por valor ────────
   function buildGeoTable(field, containerId, eneCanvasId) {
-    const vals = [...new Set(rows.map(r => r[field] || '(vacío)'))].sort();
+    const vals = [...new Set(rows.map(r => r[field] || '(vacío)'))].sort().filter(v => v !== '(vacío)');
     const nuevo = rows.filter(r => r.buyer_type === 'NUEVO');
     const recur = rows.filter(r => r.buyer_type === 'RECURRENTE');
     const totN = nuevo.reduce((s,r)=>s+r.q,0);
