@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrega Fantasma — Rebound Mar 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3250;
+    --accent: #ffe600; --red: #ff4d4d; --orange: #ff8c42; --green: #4dff91;
+    --blue: #4d9fff; --text: #e8eaf0; --muted: #7a7f99;
+    --mlm: #ff6b35; --mlb: #3d9be9; --mla: #4dbbaa; --mlc: #b44dff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* HEADER */
+  .header { background: linear-gradient(135deg,#1a1d27,#0f1117); border-bottom: 2px solid var(--accent); padding: 24px 40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:22px; font-weight:700; color:var(--accent); }
+  .header .sub { color:var(--muted); font-size:12px; margin-top:3px; }
+  .header .pills { display:flex; gap:10px; flex-wrap:wrap; }
+  .pill { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:4px 14px; font-size:11px; color:var(--muted); }
+
+  /* TABS */
+  .tabs-nav { display:flex; gap:0; border-bottom:2px solid var(--border); padding: 0 40px; background:var(--surface); position:sticky; top:0; z-index:100; }
+  .tab-btn { padding:14px 24px; font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; color:var(--muted); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; letter-spacing:.3px; }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-btn.mlm-tab.active { color:var(--mlm); border-bottom-color:var(--mlm); }
+  .tab-btn.mlb-tab.active { color:var(--mlb); border-bottom-color:var(--mlb); }
+  .tab-btn.mla-tab.active { color:var(--mla); border-bottom-color:var(--mla); }
+  .tab-btn.mlc-tab.active { color:var(--mlc); border-bottom-color:var(--mlc); }
+
+  /* TAB CONTENT */
+  .tab-content { display:none; padding:32px 40px; max-width:1400px; margin:0 auto; }
+  .tab-content.active { display:block; }
+
+  /* CARDS & GRID */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:22px; margin-bottom:20px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+
+  /* KPI */
+  .kpi { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px 20px; text-align:center; }
+  .kpi .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+  .badge-mlm { background:rgba(255,107,53,.2); color:var(--mlm); border:1px solid var(--mlm); }
+  .badge-mlb { background:rgba(61,155,233,.2); color:var(--mlb); border:1px solid var(--mlb); }
+  .badge-mla { background:rgba(77,187,170,.2); color:var(--mla); border:1px solid var(--mla); }
+  .badge-mlc { background:rgba(180,77,255,.2); color:var(--mlc); border:1px solid var(--mlc); }
+  .kpi .val-green { font-size:22px; font-weight:700; color:var(--green); }
+  .kpi .val-red { font-size:22px; font-weight:700; color:var(--red); margin-top:6px; }
+  .kpi .label { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  /* SECTION TITLES */
+  .sec { font-size:15px; font-weight:700; border-left:3px solid var(--accent); padding-left:12px; margin:24px 0 14px; }
+  .sec span { color:var(--muted); font-size:12px; font-weight:400; margin-left:8px; }
+
+  /* CHARTS */
+  .chart-wrap { position:relative; }
+  .h380 { height:380px; }
+  .h300 { height:300px; }
+  .h260 { height:260px; }
+  .h320 { height:320px; }
+
+  /* TABLES */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:9px 12px; background:var(--surface2); color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.7px; border-bottom:1px solid var(--border); }
+  td { padding:8px 12px; border-bottom:1px solid rgba(46,50,80,.4); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,230,0,.02); }
+  .pct-cell { font-weight:600; font-variant-numeric:tabular-nums; }
+  .pct-low { color:var(--green); } .pct-mid { color:var(--orange); } .pct-high { color:var(--red); }
+  .delta-pos { color:var(--red); font-weight:600; } .delta-neg { color:var(--green); font-weight:600; }
+
+  /* BADGES */
+  .alarm { background:rgba(255,77,77,.15); color:var(--red); border:1px solid var(--red); border-radius:4px; padding:1px 7px; font-size:11px; font-weight:700; }
+  .warn { background:rgba(255,140,66,.15); color:var(--orange); border:1px solid var(--orange); border-radius:4px; padding:1px 7px; font-size:11px; font-weight:700; }
+
+  /* NARRATIVE */
+  .narrative { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:18px 22px; margin-bottom:20px; line-height:1.8; }
+  .narrative p { margin-bottom:8px; } .narrative p:last-child { margin-bottom:0; }
+  .narrative strong { color:var(--accent); }
+  .hl-red { color:var(--red); font-weight:600; } .hl-green { color:var(--green); font-weight:600; }
+
+  /* REF LEGEND */
+  .ref-leg { display:flex; gap:18px; margin-bottom:10px; flex-wrap:wrap; }
+  .ref-item { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); }
+  .ref-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .ref-dash { width:22px; height:2px; background:repeating-linear-gradient(90deg,#facc15 0,#facc15 4px,transparent 4px,transparent 8px); }
+  .ref-dash2 { width:22px; height:2px; background:repeating-linear-gradient(90deg,#4dff91 0,#4dff91 4px,transparent 4px,transparent 8px); }
+
+  /* BUBBLE LEGEND NOTE */
+  .bubble-note { font-size:11px; color:var(--muted); margin-top:8px; text-align:center; }
+
+  .footer { text-align:center; padding:24px; color:var(--muted); font-size:11px; border-top:1px solid var(--border); margin-top:32px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="h1-wrap"><h1>Entrega Fantasma — Análisis Rebound</h1></div>
+    <div class="sub">Mercado Envíos Off · Cards + Credit Cards · Granularidad WM · PRODUCT IN ("Cards","Credit Cards")</div>
+  </div>
+  <div class="pills">
+    <span class="pill">Oct 13, 2025 → Mar 16, 2026</span>
+    <span class="pill">Trough: Feb 09–23</span>
+    <span class="pill">Rebound: Mar 02–16</span>
+    <span class="pill">MLM · MLB · MLA · MLC</span>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div class="tabs-nav">
+  <button class="tab-btn active" onclick="showTab('resumen',this)">Resumen</button>
+  <button class="tab-btn mlm-tab" onclick="showTab('mlm',this)">🇲🇽 MLM</button>
+  <button class="tab-btn mlb-tab" onclick="showTab('mlb',this)">🇧🇷 MLB</button>
+  <button class="tab-btn mla-tab" onclick="showTab('mla',this)">🇦🇷 MLA</button>
+  <button class="tab-btn mlc-tab" onclick="showTab('mlc',this)">🇨🇱 MLC</button>
+</div>
+
+<!-- ===================== TAB: RESUMEN ===================== -->
+<div id="tab-resumen" class="tab-content active">
+
+  <div class="grid-4">
+    <div class="kpi"><div class="badge badge-mlm">MLM</div><div class="val-green">1.45%</div><div class="label">mínimo Feb-09</div><div class="val-red">2.05%</div><div class="label">▲ +0.60pp rebound</div></div>
+    <div class="kpi"><div class="badge badge-mlb">MLB</div><div class="val-green">0.79%</div><div class="label">mínimo Feb-09</div><div class="val-red">1.16%</div><div class="label">▲ +0.37pp rebound</div></div>
+    <div class="kpi"><div class="badge badge-mla">MLA</div><div class="val-green">0.62%</div><div class="label">mínimo Mar-02</div><div class="val-red">1.05%</div><div class="label">▲ +0.43pp rebound</div></div>
+    <div class="kpi"><div class="badge badge-mlc">MLC</div><div class="val-green">0.43%</div><div class="label">mínimo Feb-16</div><div class="val-red">0.59%</div><div class="label">▲ +0.16pp rebound</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ref-leg">
+      <div class="ref-item"><div class="ref-dot" style="background:var(--mlm)"></div><span style="color:var(--mlm);font-weight:600">MLM</span></div>
+      <div class="ref-item"><div class="ref-dot" style="background:var(--mlb)"></div><span style="color:var(--mlb);font-weight:600">MLB</span></div>
+      <div class="ref-item"><div class="ref-dot" style="background:var(--mla)"></div><span style="color:var(--mla);font-weight:600">MLA</span></div>
+      <div class="ref-item"><div class="ref-dot" style="background:var(--mlc)"></div><span style="color:var(--mlc);font-weight:600">MLC</span></div>
+      <div class="ref-item"><div class="ref-dash"></div><span>Meet 2.00%</span></div>
+      <div class="ref-item"><div class="ref-dash2"></div><span>Above 0.50%</span></div>
+    </div>
+    <div class="chart-wrap h380"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <div class="narrative">
+    <p><strong>Fase 1 — Baja sostenida (Oct 2025 → Feb 2026):</strong> Todos los sites bajaron consistentemente durante ~18 semanas. MLM pasó de <span class="hl-red">4.62%</span> (Nov-24) a <span class="hl-green">1.45%</span> (Feb-09). MLB de 2.53% a 0.79%. MLA cruzó bajo el target "Above" (0.50%) en Feb-16.</p>
+    <p><strong>Fase 2 — Rebound (Mar 2026):</strong> Los 4 sites revierten simultáneamente desde Mar-02. La simultaneidad cross-site descarta causas puntuales por país. El rebound es más pronunciado en <strong>MLM</strong> (+0.60pp) y <strong>MLA</strong> (+0.43pp). MLC permanece el site más estable (+0.16pp).</p>
+    <p><strong>Causa raíz identificada:</strong> Concentración en <strong>KANGU</strong> y <strong>Envíos Extra</strong> en MLM (~80% del delta de EFs). En MLA, <strong>Fleet</strong> y <strong>Urbano</strong> lideran por tasa relativa. En MLB, volumen distribuido en múltiples MLPs. Drivers específicos con tasas >50% EF confirman comportamiento individual, no sistémico. Ver tabs por país para detalle.</p>
+  </div>
+
+  <!-- Resumen tabla top offenders cross-site -->
+  <div class="sec">Top MLPs Cross-Site <span>Rebound — ordenados por Δ EF absoluto</span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Rank</th><th>País</th><th>MLP</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="badge badge-mlm" style="font-size:10px">MLM</span></td><td><strong>Envíos Extra</strong></td><td class="pct-cell pct-mid">1.94%</td><td class="pct-cell pct-high">2.63%</td><td class="delta-pos">+1,481</td><td class="delta-pos">+0.69pp</td><td><span class="alarm">CRÍTICO</span></td></tr>
+        <tr><td>2</td><td><span class="badge badge-mlm" style="font-size:10px">MLM</span></td><td><strong>KANGU</strong></td><td class="pct-cell pct-mid">2.10%</td><td class="pct-cell pct-high">2.64%</td><td class="delta-pos">+1,350</td><td class="delta-pos">+0.54pp</td><td><span class="alarm">CRÍTICO</span></td></tr>
+        <tr><td>3</td><td><span class="badge badge-mlb" style="font-size:10px">MLB</span></td><td><strong>Envios Extra</strong></td><td class="pct-cell pct-mid">1.22%</td><td class="pct-cell pct-mid">1.39%</td><td class="delta-pos">+1,303</td><td class="delta-pos">+0.17pp</td><td><span class="warn">ATENCIÓN</span></td></tr>
+        <tr><td>4</td><td><span class="badge badge-mlb" style="font-size:10px">MLB</span></td><td><strong>Kangu Logistics</strong></td><td class="pct-cell pct-low">0.76%</td><td class="pct-cell pct-low">0.97%</td><td class="delta-pos">+284</td><td class="delta-pos">+0.21pp</td><td><span class="warn">ATENCIÓN</span></td></tr>
+        <tr><td>5</td><td><span class="badge badge-mla" style="font-size:10px">MLA</span></td><td><strong>Urbano</strong></td><td class="pct-cell pct-mid">1.66%</td><td class="pct-cell pct-high">2.12%</td><td class="delta-pos">+213</td><td class="delta-pos">+0.46pp</td><td><span class="warn">ATENCIÓN</span></td></tr>
+        <tr><td>6</td><td><span class="badge badge-mla" style="font-size:10px">MLA</span></td><td><strong>Southpost</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-low">0.95%</td><td class="delta-pos">+172</td><td class="delta-pos">+0.41pp</td><td><span class="warn">ATENCIÓN</span></td></tr>
+        <tr><td>7</td><td><span class="badge badge-mlc" style="font-size:10px">MLC</span></td><td><strong>Envíos Extra</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-low">0.75%</td><td class="delta-pos">+111</td><td class="delta-pos">+0.21pp</td><td>—</td></tr>
+        <tr><td>8</td><td><span class="badge badge-mlm" style="font-size:10px">MLM</span></td><td><strong>IZoom</strong></td><td class="pct-cell pct-high">2.37%</td><td class="pct-cell pct-high">2.59%</td><td class="delta-pos">+98</td><td class="delta-pos">+0.22pp</td><td><span class="warn">ATENCIÓN</span></td></tr>
+        <tr><td>9</td><td><span class="badge badge-mlm" style="font-size:10px">MLM</span></td><td><strong>MINUTOANTES</strong></td><td class="pct-cell pct-low">0.99%</td><td class="pct-cell pct-mid">1.39%</td><td class="delta-pos">+95</td><td class="delta-pos">+0.40pp</td><td>—</td></tr>
+        <tr><td>10</td><td><span class="badge badge-mlc" style="font-size:10px">MLC</span></td><td><strong>Kangu</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-mid">1.01%</td><td class="delta-pos">+41</td><td class="delta-pos">+0.47pp</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== TAB: MLM ===================== -->
+<div id="tab-mlm" class="tab-content">
+  <div class="grid-4">
+    <div class="kpi"><div class="badge badge-mlm">MLM</div><div class="val-green">1.45%</div><div class="label">mínimo (Feb-09)</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">% EF Rebound</div><div class="val-red" style="font-size:26px">2.05%</div><div class="label">semana Mar-09</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Δ EFs rebound</div><div class="val-red" style="font-size:26px">+2,954</div><div class="label">EFs adicionales vs trough</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Principales responsables</div><div style="font-size:14px;font-weight:700;margin-top:8px;color:var(--text)">KANGU + Envíos Extra</div><div class="label">~80% del delta total</div></div>
+  </div>
+
+  <div class="sec">Scatter MLPs — # EF vs % EF rate <span>tamaño de burbuja = volumen total de envíos · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h380"><canvas id="bubbleMLM"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos). Cuadrante superior derecho = mayor impacto y peor tasa.</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">% EF por MLP <span>trough vs rebound</span></div>
+      <div class="card"><div class="chart-wrap h300"><canvas id="barMLM"></canvas></div></div>
+    </div>
+    <div>
+      <div class="sec">Top MLPs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>MLP</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Envíos Extra</strong></td><td class="pct-cell pct-mid">1.94%</td><td class="pct-cell pct-high">2.63%</td><td class="delta-pos">+1,481</td><td class="delta-pos">+0.69pp</td></tr>
+            <tr><td><strong>KANGU</strong></td><td class="pct-cell pct-mid">2.10%</td><td class="pct-cell pct-high">2.64%</td><td class="delta-pos">+1,350</td><td class="delta-pos">+0.54pp</td></tr>
+            <tr><td><strong>MINUTOANTES</strong></td><td class="pct-cell pct-low">0.99%</td><td class="pct-cell pct-mid">1.39%</td><td class="delta-pos">+95</td><td class="delta-pos">+0.40pp</td></tr>
+            <tr><td><strong>IZoom</strong></td><td class="pct-cell pct-high">2.37%</td><td class="pct-cell pct-high">2.59%</td><td class="delta-pos">+98</td><td class="delta-pos">+0.22pp</td></tr>
+            <tr><td><strong>Movicity</strong></td><td class="pct-cell pct-mid">1.43%</td><td class="pct-cell pct-mid">1.67%</td><td class="delta-pos">+79</td><td class="delta-pos">+0.24pp</td></tr>
+            <tr><td>portos logistica</td><td class="pct-cell pct-low">0.85%</td><td class="pct-cell pct-mid">1.10%</td><td class="delta-pos">+72</td><td class="delta-pos">+0.25pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Scatter Hubs (SHP_LG_FACILITY_ID) — # EF vs % EF rate <span>tamaño de burbuja = volumen estimado · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h320"><canvas id="bubbleFacMLM"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto · Y = % EF rate · Tamaño ∝ √(vol estimado). Incluye top 4 hubs con datos de tasa disponibles.</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">Top Hubs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Hub</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SMX2</strong></td><td class="pct-cell pct-mid">2.11%</td><td class="pct-cell pct-high">4.20%</td><td class="delta-pos">+477</td><td class="delta-pos">+2.09pp</td></tr>
+            <tr><td><strong>STJ1</strong></td><td class="pct-cell pct-mid">1.90%</td><td class="pct-cell pct-high">4.06%</td><td class="delta-pos">+273</td><td class="delta-pos">+2.16pp</td></tr>
+            <tr><td><strong>SMX11</strong></td><td class="pct-cell pct-mid">1.93%</td><td class="pct-cell pct-high">3.14%</td><td class="delta-pos">+263</td><td class="delta-pos">+1.21pp</td></tr>
+            <tr><td><strong>SMX8</strong></td><td class="pct-cell pct-mid">—</td><td class="pct-cell pct-high">—</td><td class="delta-pos">+191</td><td>—</td></tr>
+            <tr><td><strong>SPB1</strong></td><td class="pct-cell pct-mid">—</td><td class="pct-cell pct-high">—</td><td class="delta-pos">+143</td><td>—</td></tr>
+            <tr><td><strong>SPY1</strong></td><td class="pct-cell pct-mid">2.10%</td><td class="pct-cell pct-high">3.99%</td><td class="delta-pos">+114</td><td class="delta-pos">+1.89pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="sec">Top Drivers <span>rebound Mar 02–22</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Driver ID</th><th>CUST ID</th><th>MLP</th><th>EFs</th><th>Total</th><th>% EF</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1064662</strong></td><td style="color:var(--muted);font-size:11px">39355982</td><td>Envíos Extra</td><td>22</td><td>32</td><td class="pct-cell pct-high">68.75% <span class="alarm">ALARMA</span></td></tr>
+            <tr><td><strong>4005399</strong></td><td style="color:var(--muted);font-size:11px">528199939</td><td>Envíos Extra</td><td>20</td><td>38</td><td class="pct-cell pct-high">52.63% <span class="alarm">ALARMA</span></td></tr>
+            <tr><td><strong>185552</strong></td><td style="color:var(--muted);font-size:11px">465768519</td><td>Envíos Extra</td><td>22</td><td>39</td><td class="pct-cell pct-high">56.41% <span class="alarm">ALARMA</span></td></tr>
+            <tr><td><strong>4031115</strong></td><td style="color:var(--muted);font-size:11px">165133901</td><td>IZoom</td><td>24</td><td>53</td><td class="pct-cell pct-high">45.28% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>3765915</strong></td><td style="color:var(--muted);font-size:11px">1608175531</td><td>KANGU</td><td>57</td><td>128</td><td class="pct-cell pct-high">44.53% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>3671678</strong></td><td style="color:var(--muted);font-size:11px">261691324</td><td>KANGU</td><td>65</td><td>149</td><td class="pct-cell pct-high">43.62% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>2733570</strong></td><td style="color:var(--muted);font-size:11px">722011484</td><td>KANGU</td><td>240</td><td>640</td><td class="pct-cell pct-mid">37.50% <span class="warn">ATENCIÓN</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB: MLB ===================== -->
+<div id="tab-mlb" class="tab-content">
+  <div class="grid-4">
+    <div class="kpi"><div class="badge badge-mlb">MLB</div><div class="val-green">0.79%</div><div class="label">mínimo (Feb-09)</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">% EF Rebound</div><div class="val-red" style="font-size:26px">1.16%</div><div class="label">semana Mar-16</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Δ EFs rebound</div><div class="val-red" style="font-size:26px">+1,912</div><div class="label">EFs adicionales vs trough</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Principal responsable</div><div style="font-size:14px;font-weight:700;margin-top:8px;color:var(--text)">Envios Extra</div><div class="label">68% del delta total</div></div>
+  </div>
+
+  <div class="sec">Scatter MLPs — # EF vs % EF rate <span>tamaño de burbuja = volumen total de envíos · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h380"><canvas id="bubbleMLB"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos). Cuadrante superior derecho = mayor impacto y peor tasa.</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">% EF por MLP <span>trough vs rebound</span></div>
+      <div class="card"><div class="chart-wrap h300"><canvas id="barMLB"></canvas></div></div>
+    </div>
+    <div>
+      <div class="sec">Top MLPs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>MLP</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Envios Extra</strong></td><td class="pct-cell pct-mid">1.22%</td><td class="pct-cell pct-mid">1.39%</td><td class="delta-pos">+1,303</td><td class="delta-pos">+0.17pp</td></tr>
+            <tr><td><strong>Kangu Logistics</strong></td><td class="pct-cell pct-low">0.76%</td><td class="pct-cell pct-low">0.97%</td><td class="delta-pos">+284</td><td class="delta-pos">+0.21pp</td></tr>
+            <tr><td><strong>Hawk Transportes</strong></td><td class="pct-cell pct-low">0.59%</td><td class="pct-cell pct-low">0.84%</td><td class="delta-pos">+106</td><td class="delta-pos">+0.25pp</td></tr>
+            <tr><td><strong>RodaCoop</strong></td><td class="pct-cell pct-low">0.51%</td><td class="pct-cell pct-low">0.69%</td><td class="delta-pos">+138</td><td class="delta-pos">+0.18pp</td></tr>
+            <tr><td><strong>Murici</strong></td><td class="pct-cell pct-low">0.67%</td><td class="pct-cell pct-low">0.84%</td><td class="delta-pos">+81</td><td class="delta-pos">+0.17pp</td></tr>
+            <tr><td>MSR</td><td class="pct-cell pct-low">0.97%</td><td class="pct-cell pct-mid">1.27%</td><td class="delta-pos">+58</td><td class="delta-pos">+0.30pp</td></tr>
+            <tr><td>AR CARGO</td><td class="pct-cell pct-mid">1.25%</td><td class="pct-cell pct-mid">1.96%</td><td class="delta-pos">+11</td><td class="delta-pos">+0.71pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Scatter Hubs (SHP_LG_FACILITY_ID) — # EF vs % EF rate <span>tamaño de burbuja = volumen total · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h320"><canvas id="bubbleFacMLB"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos). Cuadrante sup. derecho = mayor impacto y peor tasa.</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">Top Hubs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Hub</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SAL1</strong></td><td class="pct-cell pct-low">0.74%</td><td class="pct-cell pct-mid">1.37%</td><td class="delta-pos">+126</td><td class="delta-pos">+0.63pp</td></tr>
+            <tr><td><strong>SPA1</strong></td><td class="pct-cell pct-mid">1.68%</td><td class="pct-cell pct-mid">1.81%</td><td class="delta-pos">+119</td><td class="delta-pos">+0.13pp</td></tr>
+            <tr><td><strong>SCE1</strong></td><td class="pct-cell pct-low">0.83%</td><td class="pct-cell pct-mid">1.01%</td><td class="delta-pos">+118</td><td class="delta-pos">+0.18pp</td></tr>
+            <tr><td><strong>SDF1</strong></td><td class="pct-cell pct-mid">1.10%</td><td class="pct-cell pct-mid">1.47%</td><td class="delta-pos">+85</td><td class="delta-pos">+0.37pp</td></tr>
+            <tr><td><strong>SBA1</strong></td><td class="pct-cell pct-mid">1.05%</td><td class="pct-cell pct-mid">1.64%</td><td class="delta-pos">+75</td><td class="delta-pos">+0.59pp</td></tr>
+            <tr><td><strong>SGO2</strong></td><td class="pct-cell pct-low">0.89%</td><td class="pct-cell pct-mid">1.73%</td><td class="delta-pos">+33</td><td class="delta-pos">+0.84pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="sec">Top Drivers <span>rebound Mar 02–22</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Driver ID</th><th>CUST ID</th><th>MLP</th><th>EFs</th><th>Total</th><th>% EF</th></tr></thead>
+          <tbody>
+            <tr><td><strong>3673257</strong></td><td style="color:var(--muted);font-size:11px">284411418</td><td>Envios Extra</td><td>33</td><td>82</td><td class="pct-cell pct-high">40.24% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>2576273</strong></td><td style="color:var(--muted);font-size:11px">535099328</td><td>Kangu Logistics</td><td>16</td><td>34</td><td class="pct-cell pct-high">47.06% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>2079574</strong></td><td style="color:var(--muted);font-size:11px">1646460060</td><td>Envios Extra</td><td>16</td><td>47</td><td class="pct-cell pct-mid">34.04%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB: MLA ===================== -->
+<div id="tab-mla" class="tab-content">
+  <div class="grid-4">
+    <div class="kpi"><div class="badge badge-mla">MLA</div><div class="val-green">0.62%</div><div class="label">mínimo (Mar-02)</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">% EF Rebound</div><div class="val-red" style="font-size:26px">1.05%</div><div class="label">semana Mar-16</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Δ EFs rebound</div><div class="val-red" style="font-size:26px">+799</div><div class="label">EFs adicionales vs trough</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Top offenders rebound</div><div style="font-size:13px;font-weight:700;margin-top:8px;color:var(--text)">Urbano <span style="color:var(--red)">+213 EFs</span></div><div class="label">mayor impacto absoluto</div><div style="font-size:13px;font-weight:700;margin-top:6px;color:var(--text)">Fleet <span style="color:var(--red)">2.17%</span></div><div class="label">peor tasa relativa</div></div>
+  </div>
+
+  <div class="sec">Scatter MLPs — # EF vs % EF rate <span>tamaño de burbuja = volumen total de envíos · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h380"><canvas id="bubbleMLA"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos).</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">% EF por MLP <span>trough vs rebound · ordenado por Δpp</span></div>
+      <div class="card"><div class="chart-wrap h300"><canvas id="barMLA"></canvas></div></div>
+    </div>
+    <div>
+      <div class="sec">Top MLPs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>MLP</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Fleet</strong></td><td class="pct-cell pct-mid">1.26%</td><td class="pct-cell pct-high">2.17%</td><td class="delta-pos">+55</td><td class="delta-pos">+0.91pp</td></tr>
+            <tr><td><strong>Urbano</strong></td><td class="pct-cell pct-mid">1.66%</td><td class="pct-cell pct-high">2.12%</td><td class="delta-pos">+213</td><td class="delta-pos">+0.46pp</td></tr>
+            <tr><td><strong>Southpost</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-low">0.95%</td><td class="delta-pos">+172</td><td class="delta-pos">+0.41pp</td></tr>
+            <tr><td><strong>Loginter</strong></td><td class="pct-cell pct-mid">1.16%</td><td class="pct-cell pct-mid">1.17%</td><td class="delta-pos">+104</td><td class="delta-pos">+0.01pp</td></tr>
+            <tr><td><strong>EPSA</strong></td><td class="pct-cell pct-low">0.71%</td><td class="pct-cell pct-low">0.84%</td><td class="delta-pos">+121</td><td class="delta-pos">+0.13pp</td></tr>
+            <tr><td><strong>Fast Track</strong></td><td class="pct-cell pct-low">0.60%</td><td class="pct-cell pct-low">0.72%</td><td class="delta-pos">+92</td><td class="delta-pos">+0.12pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Scatter Hubs (SHP_LG_FACILITY_ID) — # EF vs % EF rate <span>tamaño de burbuja = volumen total · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h320"><canvas id="bubbleFacMLA"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos).</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">Top Hubs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Hub</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>STU1</strong></td><td class="pct-cell pct-mid">2.44%</td><td class="pct-cell pct-high">3.30%</td><td class="delta-pos">+224</td><td class="delta-pos">+0.86pp</td></tr>
+            <tr><td><strong>SBU2</strong></td><td class="pct-cell pct-low">0.68%</td><td class="pct-cell pct-low">0.90%</td><td class="delta-pos">+134</td><td class="delta-pos">+0.22pp</td></tr>
+            <tr><td><strong>SRE1</strong></td><td class="pct-cell pct-mid">1.25%</td><td class="pct-cell pct-mid">1.95%</td><td class="delta-pos">+106</td><td class="delta-pos">+0.70pp</td></tr>
+            <tr><td><strong>SRV1</strong></td><td class="pct-cell pct-low">0.50%</td><td class="pct-cell pct-high">2.67%</td><td class="delta-pos">+79</td><td class="delta-pos">+2.17pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="sec">Top Drivers <span>rebound Mar 02–22</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Driver ID</th><th>CUST ID</th><th>MLP</th><th>EFs</th><th>Total</th><th>% EF</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1165200</strong></td><td style="color:var(--muted);font-size:11px">293206376</td><td>Southpost</td><td>37</td><td>71</td><td class="pct-cell pct-high">52.11% <span class="alarm">ALARMA</span></td></tr>
+            <tr><td><strong>3504237</strong></td><td style="color:var(--muted);font-size:11px">1056004059</td><td>Fleet</td><td>15</td><td>35</td><td class="pct-cell pct-high">42.86% <span class="warn">ATENCIÓN</span></td></tr>
+            <tr><td><strong>3691779</strong></td><td style="color:var(--muted);font-size:11px">232473254</td><td>Envíos Extra</td><td>16</td><td>41</td><td class="pct-cell pct-mid">39.02%</td></tr>
+            <tr><td><strong>3684479</strong></td><td style="color:var(--muted);font-size:11px">1813232281</td><td>Urbano</td><td>20</td><td>105</td><td class="pct-cell pct-mid">19.05%</td></tr>
+            <tr><td><strong>3684932</strong></td><td style="color:var(--muted);font-size:11px">1504489657</td><td>Urbano</td><td>16</td><td>34</td><td class="pct-cell pct-high">47.06% <span class="warn">ATENCIÓN</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB: MLC ===================== -->
+<div id="tab-mlc" class="tab-content">
+  <div class="grid-4">
+    <div class="kpi"><div class="badge badge-mlc">MLC</div><div class="val-green">0.43%</div><div class="label">mínimo (Feb-16)</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">% EF Rebound</div><div class="val-red" style="font-size:26px">0.59%</div><div class="label">semana Mar-09</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Δ EFs rebound</div><div class="val-red" style="font-size:26px">+165</div><div class="label">EFs adicionales vs trough</div></div>
+    <div class="kpi"><div style="font-size:11px;color:var(--muted)">Site más estable</div><div style="font-size:14px;font-weight:700;margin-top:8px;color:var(--green)">Bajo "Above" target</div><div class="label">Rebound moderado +0.16pp</div></div>
+  </div>
+
+  <div class="sec">Scatter MLPs — # EF vs % EF rate <span>tamaño de burbuja = volumen total · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h380"><canvas id="bubbleMLC"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto en rebound · Y = % EF rate · Tamaño ∝ √(total envíos).</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">% EF por MLP <span>trough vs rebound · ordenado por Δpp</span></div>
+      <div class="card"><div class="chart-wrap h260"><canvas id="barMLC"></canvas></div></div>
+    </div>
+    <div>
+      <div class="sec">Top MLPs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>MLP</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kangu</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-mid">1.01%</td><td class="delta-pos">+41</td><td class="delta-pos">+0.47pp</td></tr>
+            <tr><td><strong>LLEGO</strong></td><td class="pct-cell pct-low">0.24%</td><td class="pct-cell pct-low">0.50%</td><td class="delta-pos">+13</td><td class="delta-pos">+0.26pp</td></tr>
+            <tr><td><strong>Envíos Extra</strong></td><td class="pct-cell pct-low">0.54%</td><td class="pct-cell pct-low">0.75%</td><td class="delta-pos">+111</td><td class="delta-pos">+0.21pp</td></tr>
+            <tr><td>BigTicket</td><td class="pct-cell pct-low">0.29%</td><td class="pct-cell pct-low">0.43%</td><td class="delta-pos">+9</td><td class="delta-pos">+0.14pp</td></tr>
+            <tr><td>Yanez</td><td class="pct-cell pct-low">0.80%</td><td class="pct-cell pct-low">0.43%</td><td class="delta-neg">-5</td><td class="delta-neg">-0.37pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Scatter Hubs (SHP_LG_FACILITY_ID) — # EF vs % EF rate <span>tamaño de burbuja = volumen estimado · rebound period</span></div>
+  <div class="card">
+    <div class="chart-wrap h260"><canvas id="bubbleFacMLC"></canvas></div>
+    <p class="bubble-note">X = # EF absoluto · Y = % EF rate · Tamaño ∝ √(vol estimado). MLC concentra su actividad en 2 hubs principales.</p>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="sec">Top Hubs — detalle</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Hub</th><th>% Trough</th><th>% Rebound</th><th>Δ EFs</th><th>Δ pp</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SRM2</strong></td><td class="pct-cell pct-low">0.45%</td><td class="pct-cell pct-low">0.70%</td><td class="delta-pos">+79</td><td class="delta-pos">+0.25pp</td></tr>
+            <tr><td><strong>SRM1</strong></td><td class="pct-cell pct-low">0.52%</td><td class="pct-cell pct-low">0.84%</td><td class="delta-pos">+63</td><td class="delta-pos">+0.32pp</td></tr>
+            <tr><td><strong>SVP3</strong></td><td class="pct-cell pct-low">—</td><td class="pct-cell pct-low">—</td><td class="delta-pos">+16</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="sec">Top Drivers <span>rebound Mar 02–22</span></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Driver ID</th><th>CUST ID</th><th>MLP</th><th>EFs</th><th>Total</th><th>% EF</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1967310</strong></td><td style="color:var(--muted);font-size:11px">1834022758</td><td>Kangu</td><td>14</td><td>91</td><td class="pct-cell pct-mid">15.38%</td></tr>
+          </tbody>
+        </table>
+        <p style="color:var(--muted);font-size:11px;margin-top:12px">MLC no presenta drivers individuales con tasas alarmantes. El rebound es moderado y distribuido.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Análisis generado: 27 Mar 2026 · Mercado Envíos Off · PRODUCT IN ("Cards","Credit Cards") · SHP_CARRIER_ID IN ("Mercado Envios","Reprocesos Carrito","MercadoEnvios")
+</div>
+
+<script>
+Chart.defaults.color = '#7a7f99';
+Chart.defaults.borderColor = '#2e3250';
+Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+Chart.defaults.font.size = 11;
+
+// ===== TAB SWITCH =====
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== TREND CHART =====
+const refPlugin = {
+  id:'refLines',
+  afterDraw(chart) {
+    const {ctx,scales:{y},chartArea:{left,right}} = chart;
+    const line = (val,color,lbl) => {
+      const py = y.getPixelForValue(val);
+      ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(left,py); ctx.lineTo(right,py); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle=color; ctx.font='11px Segoe UI';
+      ctx.fillText(lbl, right-85, py-5); ctx.restore();
+    };
+    line(2,'#facc15','Meet 2.00%');
+    line(0.5,'#4dff91','Above 0.50%');
+  }
+};
+const LABELS=['Oct-13','Oct-20','Oct-27','Nov-03','Nov-10','Nov-17','Nov-24','Dec-01','Dec-08','Dec-15','Dec-22','Dec-29','Jan-05','Jan-12','Jan-19','Jan-26','Feb-02','Feb-09','Feb-16','Feb-23','Mar-02','Mar-09','Mar-16'];
+new Chart(document.getElementById('trendChart').getContext('2d'), {
+  type:'line', plugins:[refPlugin],
+  data:{labels:LABELS,datasets:[
+    {label:'MLM',data:[3.5451,4.0899,4.5271,4.0631,4.1310,4.0451,4.6208,3.6004,3.2635,2.6341,2.5633,2.5765,1.9713,1.9470,1.9239,1.9097,1.5892,1.4492,1.5409,1.6397,1.7451,2.0506,1.9842],borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.07)',tension:.3,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'MLB',data:[2.1249,2.4601,2.5270,2.1691,1.8871,2.1020,1.9766,1.5704,1.3180,1.1545,1.1385,1.1411,1.0186,0.9969,1.0646,1.1163,0.8647,0.7925,0.8760,0.8856,0.8850,1.0364,1.1568],borderColor:'#3d9be9',backgroundColor:'rgba(61,155,233,.07)',tension:.3,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'MLA',data:[1.6395,1.7204,1.5144,1.8548,1.6620,1.6414,1.7172,1.5710,1.4884,1.3766,1.3975,1.3509,1.1909,1.0980,0.9302,0.8772,0.8233,0.6851,0.6456,0.6962,0.6201,0.9489,1.0522],borderColor:'#4dbbaa',backgroundColor:'rgba(77,187,170,.07)',tension:.3,pointRadius:3,borderWidth:2.5,fill:false},
+    {label:'MLC',data:[0.5469,0.5461,0.7768,0.5931,0.5785,0.6116,0.7323,0.6116,0.7872,0.6718,0.8310,0.6799,0.6148,0.5662,0.4426,0.4642,0.4566,0.4657,0.4329,0.4910,0.5267,0.5929,0.5830],borderColor:'#b44dff',backgroundColor:'rgba(180,77,255,.07)',tension:.3,pointRadius:3,borderWidth:2.5,fill:false}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1d27',borderColor:'#2e3250',borderWidth:1,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},
+    scales:{x:{grid:{color:'rgba(46,50,80,.4)'},ticks:{maxRotation:45}},y:{grid:{color:'rgba(46,50,80,.4)'},ticks:{callback:v=>v.toFixed(1)+'%'},min:0,max:5.2}}}
+});
+
+// ===== BUBBLE CHART FACTORY =====
+function makeBubble(id, datasets) {
+  new Chart(document.getElementById(id).getContext('2d'), {
+    type:'bubble',
+    data:{datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'right',labels:{boxWidth:10,padding:10,font:{size:11}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2e3250',borderWidth:1,
+          callbacks:{label:ctx=>{
+            const d=ctx.raw;
+            return [`  ${ctx.dataset.label}`,`  EFs: ${d.x}  |  Rate: ${d.y.toFixed(2)}%`,`  Vol: ${d.vol.toLocaleString()}`];
+          }}}
+      },
+      scales:{
+        x:{title:{display:true,text:'# EF (absoluto)',color:'#7a7f99'},grid:{color:'rgba(46,50,80,.4)'},ticks:{font:{size:11}}},
+        y:{title:{display:true,text:'% EF rate',color:'#7a7f99'},grid:{color:'rgba(46,50,80,.4)'},ticks:{callback:v=>v.toFixed(2)+'%'}}
+      }
+    }
+  });
+}
+
+// Radius from volume: r = sqrt(vol) * scale
+function r(vol, scale) { return Math.max(4, Math.sqrt(vol) * scale); }
+
+// ---- MLM BUBBLE ----
+const scaleMLM = 30/Math.sqrt(126247);
+makeBubble('bubbleMLM',[
+  {label:'Envíos Extra',data:[{x:3322,y:2.63,r:r(126247,scaleMLM),vol:126247}],backgroundColor:'rgba(255,107,53,0.7)',borderColor:'#ff6b35'},
+  {label:'KANGU',data:[{x:3070,y:2.64,r:r(116458,scaleMLM),vol:116458}],backgroundColor:'rgba(255,200,50,0.7)',borderColor:'#ffc832'},
+  {label:'IZoom',data:[{x:421,y:2.59,r:r(16274,scaleMLM),vol:16274}],backgroundColor:'rgba(255,77,77,0.7)',borderColor:'#ff4d4d'},
+  {label:'Movicity',data:[{x:230,y:1.67,r:r(13743,scaleMLM),vol:13743}],backgroundColor:'rgba(180,77,255,0.7)',borderColor:'#b44dff'},
+  {label:'MINUTOANTES',data:[{x:208,y:1.39,r:r(14968,scaleMLM),vol:14968}],backgroundColor:'rgba(77,159,255,0.7)',borderColor:'#4d9fff'},
+  {label:'portos log.',data:[{x:181,y:1.10,r:r(16489,scaleMLM),vol:16489}],backgroundColor:'rgba(77,255,145,0.5)',borderColor:'#4dff91'},
+]);
+
+// ---- MLB BUBBLE ----
+const scaleMLB = 35/Math.sqrt(277804);
+makeBubble('bubbleMLB',[
+  {label:'Envios Extra',data:[{x:3869,y:1.39,r:r(277804,scaleMLB),vol:277804}],backgroundColor:'rgba(61,155,233,0.65)',borderColor:'#3d9be9'},
+  {label:'Kangu Logistics',data:[{x:639,y:0.97,r:r(65805,scaleMLB),vol:65805}],backgroundColor:'rgba(255,200,50,0.7)',borderColor:'#ffc832'},
+  {label:'RodaCoop',data:[{x:359,y:0.69,r:r(52073,scaleMLB),vol:52073}],backgroundColor:'rgba(77,255,145,0.6)',borderColor:'#4dff91'},
+  {label:'Hawk Transportes',data:[{x:250,y:0.84,r:r(29750,scaleMLB),vol:29750}],backgroundColor:'rgba(255,107,53,0.7)',borderColor:'#ff6b35'},
+  {label:'Murici',data:[{x:237,y:0.84,r:r(28172,scaleMLB),vol:28172}],backgroundColor:'rgba(180,77,255,0.7)',borderColor:'#b44dff'},
+  {label:'MSR',data:[{x:172,y:1.27,r:r(13555,scaleMLB),vol:13555}],backgroundColor:'rgba(255,77,77,0.7)',borderColor:'#ff4d4d'},
+  {label:'COOPMETRO',data:[{x:150,y:0.95,r:r(15854,scaleMLB),vol:15854}],backgroundColor:'rgba(255,140,66,0.7)',borderColor:'#ff8c42'},
+  {label:'Flight Cargo',data:[{x:126,y:1.08,r:r(11685,scaleMLB),vol:11685}],backgroundColor:'rgba(100,200,255,0.7)',borderColor:'#64c8ff'},
+]);
+
+// ---- MLA BUBBLE ----
+const scaleMLA = 25/Math.sqrt(23163);
+makeBubble('bubbleMLA',[
+  {label:'Urbano',data:[{x:315,y:2.12,r:r(14861,scaleMLA),vol:14861}],backgroundColor:'rgba(255,107,53,0.75)',borderColor:'#ff6b35'},
+  {label:'Southpost',data:[{x:221,y:0.95,r:r(23163,scaleMLA),vol:23163}],backgroundColor:'rgba(77,187,170,0.7)',borderColor:'#4dbbaa'},
+  {label:'EPSA',data:[{x:182,y:0.84,r:r(21703,scaleMLA),vol:21703}],backgroundColor:'rgba(61,155,233,0.7)',borderColor:'#3d9be9'},
+  {label:'Loginter',data:[{x:172,y:1.17,r:r(14721,scaleMLA),vol:14721}],backgroundColor:'rgba(255,200,50,0.7)',borderColor:'#ffc832'},
+  {label:'Fast Track',data:[{x:134,y:0.72,r:r(18692,scaleMLA),vol:18692}],backgroundColor:'rgba(77,255,145,0.6)',borderColor:'#4dff91'},
+  {label:'Fleet',data:[{x:68,y:2.17,r:r(3140,scaleMLA),vol:3140}],backgroundColor:'rgba(255,77,77,0.85)',borderColor:'#ff4d4d'},
+  {label:'ELOG',data:[{x:73,y:0.85,r:r(8553,scaleMLA),vol:8553}],backgroundColor:'rgba(180,77,255,0.6)',borderColor:'#b44dff'},
+]);
+
+// ---- MLC BUBBLE ----
+const scaleMLC = 25/Math.sqrt(26720);
+makeBubble('bubbleMLC',[
+  {label:'Envíos Extra',data:[{x:201,y:0.75,r:r(26720,scaleMLC),vol:26720}],backgroundColor:'rgba(180,77,255,0.7)',borderColor:'#b44dff'},
+  {label:'Kangu',data:[{x:56,y:1.01,r:r(5538,scaleMLC),vol:5538}],backgroundColor:'rgba(255,200,50,0.75)',borderColor:'#ffc832'},
+  {label:'LLEGO',data:[{x:19,y:0.50,r:r(3830,scaleMLC),vol:3830}],backgroundColor:'rgba(77,255,145,0.65)',borderColor:'#4dff91'},
+  {label:'BigTicket',data:[{x:16,y:0.43,r:r(3762,scaleMLC),vol:3762}],backgroundColor:'rgba(61,155,233,0.6)',borderColor:'#3d9be9'},
+  {label:'99Minutos',data:[{x:16,y:0.34,r:r(4750,scaleMLC),vol:4750}],backgroundColor:'rgba(255,107,53,0.5)',borderColor:'#ff6b35'},
+  {label:'Yanez',data:[{x:20,y:0.43,r:r(4599,scaleMLC),vol:4599}],backgroundColor:'rgba(255,77,77,0.5)',borderColor:'#ff4d4d'},
+]);
+
+// ===== BAR CHARTS (% rate) =====
+function makeBar(id, labels, troughPct, reboundPct, color) {
+  new Chart(document.getElementById(id).getContext('2d'), {
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'% Trough',data:troughPct,backgroundColor:'rgba(255,255,255,0.1)',borderColor:'rgba(255,255,255,0.3)',borderWidth:1},
+      {label:'% Rebound',data:reboundPct,backgroundColor:color.replace(')',',.7)').replace('rgb','rgba'),borderColor:color,borderWidth:1}
+    ]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,padding:10,font:{size:11}}},
+        tooltip:{backgroundColor:'#1a1d27',borderColor:'#2e3250',borderWidth:1,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.x.toFixed(2)}%`}}},
+      scales:{
+        x:{grid:{color:'rgba(46,50,80,.4)'},ticks:{callback:v=>v.toFixed(1)+'%'}},
+        y:{grid:{display:false},ticks:{font:{size:11}}}
+      }}
+  });
+}
+makeBar('barMLM',['Envíos Extra','KANGU','MINUTOANTES','Movicity','IZoom','portos log.'],[1.94,2.10,0.99,1.43,2.37,0.85],[2.63,2.64,1.39,1.67,2.59,1.10],'rgb(255,107,53)');
+makeBar('barMLB',['Envios Extra','Kangu Log.','Hawk','RodaCoop','Murici','MSR','AR CARGO'],[1.22,0.76,0.59,0.51,0.67,0.97,1.25],[1.39,0.97,0.84,0.69,0.84,1.27,1.96],'rgb(61,155,233)');
+makeBar('barMLA',['Fleet','Urbano','Southpost','Loginter','EPSA','Fast Track'],[1.26,1.66,0.54,1.16,0.71,0.60],[2.17,2.12,0.95,1.17,0.84,0.72],'rgb(77,187,170)');
+makeBar('barMLC',['Kangu','LLEGO','Envíos Extra','BigTicket'],[0.54,0.24,0.54,0.29],[1.01,0.50,0.75,0.43],'rgb(180,77,255)');
+
+// ===== FACILITY BUBBLE CHARTS =====
+// Uses same makeBubble() factory. r = sqrt(vol) * scale.
+
+// ---- MLA FACILITIES (datos exactos de query) ----
+const scaleFacMLA = 22/Math.sqrt(18906);
+makeBubble('bubbleFacMLA',[
+  {label:'STU1', data:[{x:325,y:3.30,r:r(9854, scaleFacMLA),vol:9854}],  backgroundColor:'rgba(255,77,77,0.8)',   borderColor:'#ff4d4d'},
+  {label:'SRV1', data:[{x:85, y:2.67,r:r(3184, scaleFacMLA),vol:3184}],  backgroundColor:'rgba(255,200,50,0.85)', borderColor:'#ffc832'},
+  {label:'SRE1', data:[{x:139,y:1.95,r:r(7143, scaleFacMLA),vol:7143}],  backgroundColor:'rgba(255,107,53,0.75)', borderColor:'#ff6b35'},
+  {label:'SBU2', data:[{x:170,y:0.90,r:r(18906,scaleFacMLA),vol:18906}], backgroundColor:'rgba(77,187,170,0.65)', borderColor:'#4dbbaa'},
+  {label:'SCO1', data:[{x:80, y:0.61,r:r(13136,scaleFacMLA),vol:13136}], backgroundColor:'rgba(61,155,233,0.6)',  borderColor:'#3d9be9'},
+  {label:'SLA1', data:[{x:75, y:0.80,r:r(9328, scaleFacMLA),vol:9328}],  backgroundColor:'rgba(77,255,145,0.55)', borderColor:'#4dff91'},
+  {label:'SBU1', data:[{x:73, y:0.83,r:r(8819, scaleFacMLA),vol:8819}],  backgroundColor:'rgba(180,77,255,0.6)',  borderColor:'#b44dff'},
+  {label:'SMQ1', data:[{x:71, y:0.95,r:r(7473, scaleFacMLA),vol:7473}],  backgroundColor:'rgba(255,140,66,0.65)', borderColor:'#ff8c42'},
+]);
+
+// ---- MLB FACILITIES (datos exactos de query) ----
+const scaleFacMLB = 20/Math.sqrt(29927);
+makeBubble('bubbleFacMLB',[
+  {label:'SPA1',  data:[{x:478,y:1.81,r:r(26470,scaleFacMLB),vol:26470}], backgroundColor:'rgba(61,155,233,0.8)',   borderColor:'#3d9be9'},
+  {label:'SCE1',  data:[{x:303,y:1.01,r:r(29927,scaleFacMLB),vol:29927}], backgroundColor:'rgba(255,140,66,0.7)',   borderColor:'#ff8c42'},
+  {label:'SPE1',  data:[{x:259,y:0.97,r:r(26650,scaleFacMLB),vol:26650}], backgroundColor:'rgba(77,255,145,0.55)',  borderColor:'#4dff91'},
+  {label:'SGO1',  data:[{x:223,y:1.28,r:r(17435,scaleFacMLB),vol:17435}], backgroundColor:'rgba(255,107,53,0.7)',   borderColor:'#ff6b35'},
+  {label:'SAL1',  data:[{x:221,y:1.37,r:r(16083,scaleFacMLB),vol:16083}], backgroundColor:'rgba(255,77,77,0.75)',   borderColor:'#ff4d4d'},
+  {label:'SDF1',  data:[{x:187,y:1.47,r:r(12741,scaleFacMLB),vol:12741}], backgroundColor:'rgba(180,77,255,0.7)',   borderColor:'#b44dff'},
+  {label:'SMN1',  data:[{x:175,y:1.27,r:r(13811,scaleFacMLB),vol:13811}], backgroundColor:'rgba(255,200,50,0.7)',   borderColor:'#ffc832'},
+  {label:'SBA1',  data:[{x:171,y:1.64,r:r(10397,scaleFacMLB),vol:10397}], backgroundColor:'rgba(100,200,255,0.7)', borderColor:'#64c8ff'},
+  {label:'SSP45', data:[{x:154,y:1.51,r:r(10190,scaleFacMLB),vol:10190}], backgroundColor:'rgba(255,100,180,0.65)',borderColor:'#ff64b4'},
+  {label:'SSP30', data:[{x:161,y:1.19,r:r(13532,scaleFacMLB),vol:13532}], backgroundColor:'rgba(100,255,200,0.6)', borderColor:'#64ffc8'},
+  {label:'SGO2',  data:[{x:57, y:1.73,r:r(3293, scaleFacMLB),vol:3293}],  backgroundColor:'rgba(255,160,0,0.85)',  borderColor:'#ffa000'},
+]);
+
+// ---- MLM FACILITIES (volúmenes estimados: V_rebound = ΔEF / (pct_r/100 - pct_t/100 * 1.5)) ----
+const scaleFacMLM = 20/Math.sqrt(17071);
+makeBubble('bubbleFacMLM',[
+  {label:'SMX2',  data:[{x:717,y:4.20,r:r(17071,scaleFacMLM),vol:17071}], backgroundColor:'rgba(255,77,77,0.85)',  borderColor:'#ff4d4d'},
+  {label:'SMX11', data:[{x:446,y:3.14,r:r(14204,scaleFacMLM),vol:14204}], backgroundColor:'rgba(255,200,50,0.8)',  borderColor:'#ffc832'},
+  {label:'STJ1',  data:[{x:397,y:4.06,r:r(9778, scaleFacMLM),vol:9778}],  backgroundColor:'rgba(255,107,53,0.8)',  borderColor:'#ff6b35'},
+  {label:'SPY1',  data:[{x:176,y:3.99,r:r(4401, scaleFacMLM),vol:4401}],  backgroundColor:'rgba(180,77,255,0.8)',  borderColor:'#b44dff'},
+]);
+
+// ---- MLC FACILITIES (volúmenes estimados) ----
+const scaleFacMLC = 22/Math.sqrt(18871);
+makeBubble('bubbleFacMLC',[
+  {label:'SRM2', data:[{x:132,y:0.70,r:r(18871,scaleFacMLC),vol:18871}], backgroundColor:'rgba(180,77,255,0.75)', borderColor:'#b44dff'},
+  {label:'SRM1', data:[{x:103,y:0.84,r:r(12226,scaleFacMLC),vol:12226}], backgroundColor:'rgba(255,200,50,0.8)',  borderColor:'#ffc832'},
+]);
+</script>
+</body>
+</html>
