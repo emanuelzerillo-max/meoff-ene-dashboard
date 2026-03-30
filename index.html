@@ -152,6 +152,7 @@ tr:hover td{background:#222222}
 <div class="tabs">
   <div class="tab" data-tab="resumen">Resumen</div>
   <div class="tab" data-tab="sites">Por Site</div>
+  <div class="tab" data-tab="composicion">Composición</div>
   <div class="tab" data-tab="detalle">ENE Causas</div>
   <div class="tab active" data-tab="segmento">ENE × Segmento</div>
   <div class="tab" data-tab="geo">Geolocalización</div>
@@ -194,6 +195,51 @@ tr:hover td{background:#222222}
   </div>
 </div>
 
+
+<!-- ── TAB COMPOSICIÓN ────────────────────────────────────────────────────── -->
+<div id="view-composicion" class="view">
+  <div class="kpi-row" id="comp-kpis"></div>
+  <div class="section">
+    <div class="section-title">Composición del universo Cards — distribución por Segmento</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;align-items:center">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">Total</div>
+        <div class="chart-wrap-donut"><canvas id="c-comp-total"></canvas><div class="donut-center" id="dc-total"></div></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#FFE600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">🇦🇷 MLA</div>
+        <div class="chart-wrap-donut"><canvas id="c-comp-mla"></canvas><div class="donut-center" id="dc-mla"></div></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">🇧🇷 MLB</div>
+        <div class="chart-wrap-donut"><canvas id="c-comp-mlb"></canvas><div class="donut-center" id="dc-mlb"></div></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">🇲🇽 MLM</div>
+        <div class="chart-wrap-donut"><canvas id="c-comp-mlm"></canvas><div class="donut-center" id="dc-mlm"></div></div>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:18px;justify-content:center">
+      <div class="li"><div class="ld" style="background:#FFE600"></div>New — dir. creada el día del envío</div>
+      <div class="li"><div class="ld" style="background:#555555"></div>L90D — con historial últimos 90 días</div>
+      <div class="li"><div class="ld" style="background:#3A7A5A"></div>Old — dirección preexistente sin actividad L90</div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Composición por Tarjeta — Crédito vs Débito</div>
+      <canvas id="c-comp-card" height="200"></canvas>
+    </div>
+    <div class="section">
+      <div class="section-title">Evolución mensual — % New por Site</div>
+      <canvas id="c-comp-tend" height="200"></canvas>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">ENE% por Segmento y Site — cuánto impacta cada segmento</div>
+    <div id="comp-table"></div>
+  </div>
+</div>
 
 <!-- ── TAB ENE CAUSAS ─────────────────────────────────────────────────────── -->
 <div id="view-detalle" class="view">
@@ -258,7 +304,7 @@ tr:hover td{background:#222222}
     </div>
   </div>
   <div class="section">
-    <div class="section-title">Matriz Tipo × Fuente — ENE (%) · cada celda: ENE% · envíos · N% / R%</div>
+    <div class="section-title">Matriz Tipo × Fuente — cada celda: % del volumen total · ENE% · N%/L%/O% — esquina cierra en 100%</div>
     <div id="geo-matrix"></div>
   </div>
 </div>
@@ -1013,29 +1059,33 @@ function renderGeo(rows) {
     <th class="hm-total-col" style="color:#FFE600">TOTAL</th>
   </tr>`;
 
+  const gtq = rows.reduce((a,r)=>a+r.q,0), gte = rows.reduce((a,r)=>a+r.ene_q,0);
+
   const tbody = types.map(t => {
     let rtq=0, rte=0;
     const cells = srcs.map(s => {
       const c = cross[t+' '+s];
       if (!c || !c.q) return `<td style="background:#0A0A0A"><span style="color:#2A2A2A">—</span></td>`;
       rtq += c.q; rte += c.ene;
-      const ep = pctN(c.ene, c.q);
-      const np = pctN(c.nene, c.nq);
-      const lp = pctN(c.lene, c.lq);
-      const op = pctN(c.oene, c.oq);
+      const ep  = pctN(c.ene, c.q);
+      const vp  = gtq > 0 ? (c.q / gtq * 100) : 0;
+      const np  = pctN(c.nene, c.nq);
+      const lp  = pctN(c.lene, c.lq);
+      const op  = pctN(c.oene, c.oq);
       return `<td style="background:${hmColor(ep)}">
-        <div class="hm-cell">${ep.toFixed(1)}%</div>
-        <div class="hm-sub">${fmt(c.q)}</div>
+        <div class="hm-cell">${vp.toFixed(1)}%</div>
+        <div class="hm-sub" style="color:rgba(255,255,255,.5)">ENE ${ep.toFixed(1)}%</div>
         <div class="hm-nr">N:${np.toFixed(0)}% L:${lp.toFixed(0)}% O:${op.toFixed(0)}%</div>
       </td>`;
     });
     const rtp = pctN(rte, rtq);
+    const rvp = gtq > 0 ? (rtq / gtq * 100) : 0;
     return `<tr>
       <td class="hm-rh">${t}</td>
       ${cells.join('')}
       <td class="hm-total-col" style="background:${hmColor(rtp)}">
-        <div class="hm-cell" style="color:#FFE600">${rtp.toFixed(1)}%</div>
-        <div class="hm-sub">${fmt(rtq)}</div>
+        <div class="hm-cell" style="color:#FFE600">${rvp.toFixed(1)}%</div>
+        <div class="hm-sub" style="color:rgba(255,230,0,.5)">ENE ${rtp.toFixed(1)}%</div>
       </td>
     </tr>`;
   }).join('');
@@ -1043,25 +1093,157 @@ function renderGeo(rows) {
   const colTotals = srcs.map(s => {
     let cq=0,ce=0;
     types.forEach(t => { const c=cross[t+' '+s]; if(c){cq+=c.q;ce+=c.ene;} });
-    const ep = pctN(ce,cq);
+    const ep  = pctN(ce,cq);
+    const cvp = gtq > 0 ? (cq / gtq * 100) : 0;
     return `<td style="background:${hmColor(ep)}">
-      <div class="hm-cell" style="color:#FFE600">${ep>0?ep.toFixed(1)+'%':'—'}</div>
-      <div class="hm-sub">${fmt(cq)}</div>
+      <div class="hm-cell" style="color:#FFE600">${cvp>0?cvp.toFixed(1)+'%':'—'}</div>
+      <div class="hm-sub" style="color:rgba(255,230,0,.5)">${ep>0?'ENE '+ep.toFixed(1)+'%':''}</div>
     </td>`;
   }).join('');
-  const gtq = rows.reduce((a,r)=>a+r.q,0), gte = rows.reduce((a,r)=>a+r.ene_q,0);
   const gtp = pctN(gte,gtq);
   const tfoot = `<tr class="hm-total-row">
     <th class="hm-rh">TOTAL</th>
     ${colTotals}
-    <td class="hm-total-col" style="background:${hmColor(gtp)}">
-      <div class="hm-cell" style="color:#FFE600">${gtp.toFixed(1)}%</div>
-      <div class="hm-sub">${fmt(gtq)}</div>
+    <td class="hm-total-col" style="background:#1A3A1A;border:2px solid #FFE600">
+      <div class="hm-cell" style="color:#FFE600;font-size:16px">100%</div>
+      <div class="hm-sub" style="color:rgba(255,230,0,.5)">ENE ${gtp.toFixed(1)}%</div>
+      <div class="hm-sub" style="color:rgba(255,230,0,.4)">${fmt(gtq)}</div>
     </td>
   </tr>`;
 
   document.getElementById('geo-matrix').innerHTML =
     `<div class="hm-wrap"><table class="hm-table"><thead>${thead}</thead><tbody>${tbody}</tbody><tfoot>${tfoot}</tfoot></table></div>`;
+}
+
+// ── render Composición ───────────────────────────────────────────────────
+function renderComposicion(rows) {
+  const G = '#252525';
+  const COLS = ['#FFE600','#555555','#3A7A5A'];
+  const BTYPES = ['New','L90D','Old'];
+
+  function compFor(rws) {
+    return BTYPES.map(bt => rws.filter(r=>r.buyer_type===bt).reduce((s,r)=>s+r.q,0));
+  }
+
+  // ── KPIs ─────────────────────────────────────────────────────────────────
+  const totQ = rows.reduce((s,r)=>s+r.q,0);
+  const totE = rows.reduce((s,r)=>s+r.ene_q,0);
+  document.getElementById('comp-kpis').innerHTML = BTYPES.map((bt,i) => {
+    const br = rows.filter(r=>r.buyer_type===bt);
+    const bq = br.reduce((s,r)=>s+r.q,0), be = br.reduce((s,r)=>s+r.ene_q,0);
+    return `<div class="kpi">
+      <div class="kpi-label" style="color:${COLS[i]}">${bt}</div>
+      <div class="kpi-val" style="color:${COLS[i]}">${pct(bq,totQ)}</div>
+      <div class="kpi-sub">del volumen · ENE ${pctN(be,bq).toFixed(1)}%</div>
+    </div>`;
+  }).join('') + `<div class="kpi red"><div class="kpi-label">ENE Total</div><div class="kpi-val">${pct(totE,totQ)}</div><div class="kpi-sub">${fmt(totE)} de ${fmt(totQ)}</div></div>`;
+
+  // ── Donut builder ─────────────────────────────────────────────────────────
+  function mkDonut(id, dcId, rws, label) {
+    const vals = compFor(rws);
+    const tot  = vals.reduce((s,v)=>s+v,0);
+    if (charts[id]) charts[id].destroy();
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    charts[id] = new Chart(ctx, {
+      type:'doughnut',
+      data:{ labels:BTYPES, datasets:[{data:vals,backgroundColor:COLS,borderWidth:2,borderColor:'#0F0F0F'}] },
+      options:{
+        cutout:'68%', responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{display:false}, tooltip:{callbacks:{
+          label: ctx => ` ${ctx.label}: ${tot>0?(ctx.raw/tot*100).toFixed(1):0}% (${fmt(ctx.raw)})`
+        }}}
+      }
+    });
+    const dc = document.getElementById(dcId);
+    if (dc) {
+      const newPct = tot > 0 ? (vals[0]/tot*100).toFixed(1) : '0';
+      dc.innerHTML = `<div class="donut-pct" style="font-size:16px">${newPct}%</div><div class="donut-lbl">New</div>`;
+    }
+  }
+
+  const sites = [...new Set(rows.map(r=>r.sit_site_id))].sort();
+  mkDonut('c-comp-total','dc-total', rows, 'Total');
+  mkDonut('c-comp-mla',  'dc-mla',   rows.filter(r=>r.sit_site_id==='MLA'), 'MLA');
+  mkDonut('c-comp-mlb',  'dc-mlb',   rows.filter(r=>r.sit_site_id==='MLB'), 'MLB');
+  mkDonut('c-comp-mlm',  'dc-mlm',   rows.filter(r=>r.sit_site_id==='MLM'), 'MLM');
+
+  // ── Barras apiladas por tarjeta ───────────────────────────────────────────
+  const CARDS = [['Cards (credit)','Crédito'],['Cards (debit)','Débito']];
+  mkChart('c-comp-card','bar',{
+    labels: CARDS.map(([,l])=>l),
+    datasets: BTYPES.map((bt,i) => ({
+      label: bt, backgroundColor: COLS[i],
+      data: CARDS.map(([v]) => {
+        const r = rows.filter(x=>x.shp_vertical_2===v);
+        const tot = r.reduce((s,x)=>s+x.q,0);
+        const seg = r.filter(x=>x.buyer_type===bt).reduce((s,x)=>s+x.q,0);
+        return tot > 0 ? +(seg/tot*100).toFixed(2) : 0;
+      })
+    }))
+  },{
+    scales:{
+      y:{stacked:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:G}},
+      x:{stacked:true,grid:{display:false}}
+    },
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},
+             tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`}}}
+  });
+
+  // ── Tendencia % New por site ──────────────────────────────────────────────
+  const meses = [...new Set(rows.map(r=>r.mes))].sort();
+  const SITE_STYLE = {MLA:{c:'#FFE600',d:[]},MLB:{c:'#888888',d:[5,4]},MLM:{c:'#CCCCCC',d:[3,3]}};
+  mkChart('c-comp-tend','line',{
+    labels: meses,
+    datasets: sites.map(s => {
+      const st = SITE_STYLE[s]||{c:'#888',d:[]};
+      return {
+        label:s, borderColor:st.c, backgroundColor:'transparent', borderDash:st.d,
+        borderWidth:2, fill:false, pointRadius:3,
+        data: meses.map(m => {
+          const mr  = rows.filter(r=>r.sit_site_id===s&&r.mes===m);
+          const tot = mr.reduce((s,r)=>s+r.q,0);
+          const nw  = mr.filter(r=>r.buyer_type==='New').reduce((s,r)=>s+r.q,0);
+          return tot > 0 ? +(nw/tot*100).toFixed(2) : 0;
+        })
+      };
+    })
+  },{
+    scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:G}},x:{grid:{display:false}}},
+    elements:{line:{tension:.3}},
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},
+             tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}% New`}}}
+  });
+
+  // ── Tabla resumen: site × segmento ────────────────────────────────────────
+  function eneClr(p) { return p<2?'#00A650':p<4?'#FF8800':'#FF4444'; }
+  const allSites = [...sites, '__ALL__'];
+  const thead = `<tr>
+    <th>Site</th>
+    ${BTYPES.map((bt,i)=>`<th style="color:${COLS[i]}">${bt}<br><span style="font-size:9px;font-weight:400">%vol · ENE%</span></th>`).join('')}
+    <th>Total envíos</th><th>ENE total</th>
+  </tr>`;
+  const tbody = allSites.map(s => {
+    const isAll = s==='__ALL__';
+    const sr = isAll ? rows : rows.filter(r=>r.sit_site_id===s);
+    const stot = sr.reduce((a,r)=>a+r.q,0);
+    const sene = sr.reduce((a,r)=>a+r.ene_q,0);
+    const cells = BTYPES.map((bt,i) => {
+      const br = sr.filter(r=>r.buyer_type===bt);
+      const bq = br.reduce((a,r)=>a+r.q,0), be = br.reduce((a,r)=>a+r.ene_q,0);
+      const vp = stot>0?(bq/stot*100).toFixed(1):0;
+      const ep = pctN(be,bq);
+      return `<td><span style="color:${COLS[i]};font-weight:700">${vp}%</span> <span style="color:${eneClr(ep)};font-size:11px">${ep.toFixed(1)}%</span></td>`;
+    }).join('');
+    const rs = isAll?'style="border-top:1px solid #444;background:#1F1F1F"':'';
+    return `<tr ${rs}>
+      <td style="font-weight:700;color:${isAll?'#FFE600':'#FFF'}">${isAll?'TOTAL':s}</td>
+      ${cells}
+      <td style="color:#888">${fmt(stot)}</td>
+      <td style="color:${eneClr(pctN(sene,stot))};">${pct(sene,stot)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('comp-table').innerHTML = `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
 }
 
 // ── main render ───────────────────────────────────────────────────────────
@@ -1076,6 +1258,8 @@ function render() {
   } else if (activeTab === 'sites') {
     renderSiteCards(rows);
     renderSiteBars(rows);
+  } else if (activeTab === 'composicion') {
+    renderComposicion(rows);
   } else if (activeTab === 'detalle') {
     renderDetalle(rows);
   } else if (activeTab === 'segmento') {
