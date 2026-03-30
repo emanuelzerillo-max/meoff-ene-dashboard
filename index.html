@@ -128,6 +128,15 @@ tr:hover td{background:#222222}
     </div>
   </div>
   <div class="filter-group">
+    <span class="filter-label">Segmento</span>
+    <div class="pills" id="pills-btype">
+      <span class="pill active" data-val="ALL">Todos</span>
+      <span class="pill" data-val="New">New</span>
+      <span class="pill" data-val="L90D">L90D</span>
+      <span class="pill" data-val="Old">Old</span>
+    </div>
+  </div>
+  <div class="filter-group">
     <span class="filter-label">Mes</span>
     <select id="sel-mes"><option value="ALL">Todos</option></select>
   </div>
@@ -157,22 +166,12 @@ tr:hover td{background:#222222}
   </div>
   <div class="two-col">
     <div class="section">
-      <div class="section-title">ENE (%) por Segmento y Site</div>
+      <div class="section-title">ENE (%) por Tarjeta y Site <span style="color:#555;font-weight:400;font-size:10px">(filtrá por Segmento ↑)</span></div>
       <canvas id="c-diag-ene" height="200"></canvas>
-      <div class="legend" style="margin-top:10px">
-        <div class="li"><div class="ld" style="background:#FFE600"></div>Crédito · Nueva</div>
-        <div class="li"><div class="ld" style="background:#887700"></div>Crédito · Rec</div>
-        <div class="li"><div class="ld" style="background:#CCCCCC"></div>Débito · Nueva</div>
-        <div class="li"><div class="ld" style="background:#444444"></div>Débito · Rec</div>
-      </div>
     </div>
     <div class="section">
-      <div class="section-title">Volumen por Site — Nueva vs Recurrente</div>
+      <div class="section-title">Volumen por Site <span style="color:#555;font-weight:400;font-size:10px">(filtrá por Segmento ↑)</span></div>
       <canvas id="c-diag-vol" height="200"></canvas>
-      <div class="legend" style="margin-top:10px">
-        <div class="li"><div class="ld" style="background:#FFE600"></div>Nueva dirección</div>
-        <div class="li"><div class="ld" style="background:#3A3A3A;border:1px solid #555"></div>Recurrente</div>
-      </div>
     </div>
   </div>
 </div>
@@ -181,14 +180,8 @@ tr:hover td{background:#222222}
 <div id="view-sites" class="view">
   <div class="site-grid" id="site-cards"></div>
   <div class="section">
-    <div class="section-title">ENE (%) — Nueva vs Recurrente por Site</div>
+    <div class="section-title">ENE (%) por Site <span style="color:#555;font-weight:400;font-size:10px">(filtrá por Segmento ↑)</span></div>
     <canvas id="c-site-seg" height="140"></canvas>
-    <div class="legend" style="margin-top:10px">
-      <div class="li"><div class="ld" style="background:#FFE600"></div>Crédito · Nueva</div>
-      <div class="li"><div class="ld" style="background:#887700"></div>Crédito · Rec</div>
-      <div class="li"><div class="ld" style="background:#CCCCCC"></div>Débito · Nueva</div>
-      <div class="li"><div class="ld" style="background:#444444"></div>Débito · Rec</div>
-    </div>
   </div>
   <div class="section">
     <div class="section-title">Evolución mensual ENE (%) por Site</div>
@@ -205,12 +198,8 @@ tr:hover td{background:#222222}
 <!-- ── TAB ENE CAUSAS ─────────────────────────────────────────────────────── -->
 <div id="view-detalle" class="view">
   <div class="section">
-    <div class="section-title">ENE por HU Reason — Volumen (Nueva vs Recurrente)</div>
+    <div class="section-title">ENE por HU Reason — Volumen por Segmento</div>
     <canvas id="c-hureason" height="180"></canvas>
-    <div class="legend" style="margin-top:10px">
-      <div class="li"><div class="ld" style="background:#FFE600"></div>Nueva dirección</div>
-      <div class="li"><div class="ld" style="background:#555555"></div>Recurrente</div>
-    </div>
   </div>
   <div class="two-col">
     <div class="section">
@@ -231,31 +220,17 @@ tr:hover td{background:#222222}
   <div class="kpi-row" id="seg-kpis"></div>
   <div class="two-col">
     <div class="section">
-      <div class="section-title">ENE (%) — Nueva vs Recurrente por Tarjeta</div>
+      <div class="section-title">ENE (%) — New / L90D / Old por Tarjeta</div>
       <canvas id="c-seg-bar" height="200"></canvas>
-      <div class="legend" style="margin-top:10px">
-        <div class="li"><div class="ld" style="background:#FFE600"></div>Nueva dirección</div>
-        <div class="li"><div class="ld" style="background:#444444"></div>Recurrente</div>
-      </div>
     </div>
     <div class="section">
-      <div class="section-title">Composición de Volumen por Segmento</div>
+      <div class="section-title">Composición de Volumen — New / L90D / Old</div>
       <canvas id="c-seg-vol" height="200"></canvas>
-      <div class="legend" style="margin-top:10px">
-        <div class="li"><div class="ld" style="background:#FFE600"></div>Nueva dirección</div>
-        <div class="li"><div class="ld" style="background:#444444"></div>Recurrente</div>
-      </div>
     </div>
   </div>
   <div class="section">
-    <div class="section-title">ENE (%) mensual — por Tarjeta y Segmento</div>
+    <div class="section-title">ENE (%) mensual — New / L90D / Old por Tarjeta</div>
     <canvas id="c-seg-tend" height="150"></canvas>
-    <div class="legend" style="margin-top:10px">
-      <div class="li"><div class="ld" style="background:#FFE600"></div>Crédito · Nueva</div>
-      <div class="li"><div class="ld" style="background:#887700;border:1px dashed #FFE600"></div>Crédito · Recurrente</div>
-      <div class="li"><div class="ld" style="background:#FFFFFF"></div>Débito · Nueva</div>
-      <div class="li"><div class="ld" style="background:#555555;border:1px dashed #AAAAAA"></div>Débito · Recurrente</div>
-    </div>
   </div>
 </div>
 
@@ -264,21 +239,21 @@ tr:hover td{background:#222222}
   <div class="insight-grid" id="geo-insights"></div>
   <div class="two-col">
     <div class="section">
-      <div class="section-title">Distribución por Tipo · % Nuevas vs % Recurrentes</div>
+      <div class="section-title">Distribución por Tipo — New / L90D / Old</div>
       <div id="geo-type-table"></div>
     </div>
     <div class="section">
-      <div class="section-title">Distribución por Fuente · % Nuevas vs % Recurrentes</div>
+      <div class="section-title">Distribución por Fuente — New / L90D / Old</div>
       <div id="geo-src-table"></div>
     </div>
   </div>
   <div class="two-col">
     <div class="section">
-      <div class="section-title">ENE (%) por Tipo — Nueva vs Recurrente</div>
+      <div class="section-title">ENE (%) por Tipo — New / L90D / Old</div>
       <canvas id="c-geo-type-ene" height="180"></canvas>
     </div>
     <div class="section">
-      <div class="section-title">ENE (%) por Fuente — Nueva vs Recurrente</div>
+      <div class="section-title">ENE (%) por Fuente — New / L90D / Old</div>
       <canvas id="c-geo-src-ene" height="180"></canvas>
     </div>
   </div>
@@ -298,7 +273,7 @@ Chart.defaults.borderColor = '#252525';
 
 // ── state ──────────────────────────────────────────────────────────────────
 const MES_ACTUAL = new Date().toISOString().slice(0,7);
-let fSite = 'ALL', fCard = 'ALL', fMes = 'ALL', fMesActual = false;
+let fSite = 'ALL', fCard = 'ALL', fMes = 'ALL', fMesActual = false, fBtype = 'ALL';
 const charts = {};
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -307,6 +282,15 @@ const pct   = (a, b) => b > 0 ? (a/b*100).toFixed(1)+'%' : '—';
 const pctN  = (a, b) => b > 0 ? +(a/b*100).toFixed(2) : 0;
 
 function filtered() {
+  return DATA.filter(r =>
+    (fSite === 'ALL' || r.sit_site_id === fSite) &&
+    (fCard === 'ALL' || r.shp_vertical_2 === fCard) &&
+    (fMes  === 'ALL' || r.mes === fMes) &&
+    (fMesActual || r.mes !== MES_ACTUAL) &&
+    (fBtype === 'ALL' || r.buyer_type === fBtype)
+  );
+}
+function filteredNoBtype() {
   return DATA.filter(r =>
     (fSite === 'ALL' || r.sit_site_id === fSite) &&
     (fCard === 'ALL' || r.shp_vertical_2 === fCard) &&
@@ -371,6 +355,7 @@ function bindPills(id, setter) {
 }
 bindPills('pills-site', v => fSite = v);
 bindPills('pills-card', v => fCard = v);
+bindPills('pills-btype', v => fBtype = v);
 bindPills('pills-mesactual', v => fMesActual = v === '1');
 selMes.addEventListener('change', () => { fMes = selMes.value; render(); });
 
@@ -450,38 +435,31 @@ function renderResumen(rows) {
   }).join('');
   document.getElementById('crosssite-table').innerHTML = `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
 
-  // ENE% by site — 6 segments (New / L90D / Old × credit / debit)
-  const SEGS = [
-    ['Cards (credit)','New', 'Crédito · New',  '#FFE600'],
-    ['Cards (credit)','L90D','Crédito · L90D', '#887700'],
-    ['Cards (credit)','Old', 'Crédito · Old',  '#4A9E6A'],
-    ['Cards (debit)', 'New', 'Débito · New',   '#CCCCCC'],
-    ['Cards (debit)', 'L90D','Débito · L90D',  '#444444'],
-    ['Cards (debit)', 'Old', 'Débito · Old',   '#3A6A4A'],
-  ];
+  // ENE% by site — 2 datasets (Crédito, Débito) — responde al filtro de Segmento
   mkChart('c-diag-ene','bar',{
     labels: sites,
-    datasets: SEGS.map(([v,t,l,c])=>{
-      return {label:l, borderRadius:4, backgroundColor:c,
-        data: sites.map(s=>{ const x=sg(s,v,t); return pctN(x.e,x.q); }) };
-    })
+    datasets: [
+      {label:'Crédito', borderRadius:4, backgroundColor:'#FFE600',
+        data: sites.map(s=>{ const x=sg(s,'Cards (credit)',null); return pctN(x.e,x.q); }) },
+      {label:'Débito',  borderRadius:4, backgroundColor:'#888888',
+        data: sites.map(s=>{ const x=sg(s,'Cards (debit)',null);  return pctN(x.e,x.q); }) }
+    ]
   },{
     scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:G}},x:{grid:{display:false}}},
     plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},
              tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`}}}
   });
 
-  // Volume by site nueva/recurrente
+  // Volume by site — Crédito vs Débito (responde al filtro de Segmento)
   mkChart('c-diag-vol','bar',{
     labels: sites,
     datasets:[
-      {label:'New',  data:sites.map(s=>sg(s,null,'New').q),  backgroundColor:'#FFE600'},
-      {label:'L90D', data:sites.map(s=>sg(s,null,'L90D').q), backgroundColor:'#555555'},
-      {label:'Old',  data:sites.map(s=>sg(s,null,'Old').q),  backgroundColor:'#3A3A3A'}
+      {label:'Crédito', data:sites.map(s=>sg(s,'Cards (credit)',null).q), backgroundColor:'#FFE600'},
+      {label:'Débito',  data:sites.map(s=>sg(s,'Cards (debit)',null).q),  backgroundColor:'#555555'}
     ]
   },{
     scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:G},stacked:true},x:{grid:{display:false},stacked:true}},
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}}
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}}
   });
 }
 
@@ -518,25 +496,21 @@ function renderSiteBars(rows) {
   const sites = [...new Set(rows.map(r=>r.sit_site_id))].sort();
   const G = '#252525';
 
-  // ENE% por site — 6 segmentos (New / L90D / Old × credit / debit)
-  const SEGS = [
-    ['Cards (credit)','New', 'Crédito · New',  '#FFE600'],
-    ['Cards (credit)','L90D','Crédito · L90D', '#887700'],
-    ['Cards (credit)','Old', 'Crédito · Old',  '#4A9E6A'],
-    ['Cards (debit)', 'New', 'Débito · New',   '#CCCCCC'],
-    ['Cards (debit)', 'L90D','Débito · L90D',  '#444444'],
-    ['Cards (debit)', 'Old', 'Débito · Old',   '#3A6A4A'],
-  ];
+  // ENE% por site — 2 datasets (Crédito, Débito) — responde al filtro de Segmento
   mkChart('c-site-seg','bar',{
     labels: sites,
-    datasets: SEGS.map(([v,t,l,c])=>{
-      return {label:l, borderRadius:4, backgroundColor:c,
+    datasets: [
+      {label:'Crédito', borderRadius:4, backgroundColor:'#FFE600',
         data: sites.map(s=>{
-          const sr=rows.filter(r=>r.sit_site_id===s&&r.shp_vertical_2===v&&r.buyer_type===t);
+          const sr=rows.filter(r=>r.sit_site_id===s&&r.shp_vertical_2==='Cards (credit)');
           return pctN(sr.reduce((a,r)=>a+r.ene_q,0), sr.reduce((a,r)=>a+r.q,0));
-        })
-      };
-    })
+        })},
+      {label:'Débito', borderRadius:4, backgroundColor:'#888888',
+        data: sites.map(s=>{
+          const sr=rows.filter(r=>r.sit_site_id===s&&r.shp_vertical_2==='Cards (debit)');
+          return pctN(sr.reduce((a,r)=>a+r.ene_q,0), sr.reduce((a,r)=>a+r.q,0));
+        })}
+    ]
   },{
     scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:G}},x:{grid:{display:false}}},
     plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},
@@ -581,6 +555,7 @@ function renderDetalle(rows) {
   const G = '#252525';
   const nuevo = rows.filter(r=>r.buyer_type==='New');
   const recur = rows.filter(r=>r.buyer_type==='L90D');
+  const old_  = rows.filter(r=>r.buyer_type==='Old');
 
   const HU_COLORS = {
     refused_by_buyer:    '#FF4444',
@@ -598,7 +573,7 @@ function renderDetalle(rows) {
     return r.shp_hu_reason || (r.shp_substatus === 'LOST' ? 'lost' : null);
   }
 
-  const huN = {}, huR = {};
+  const huN = {}, huR = {}, huO = {};
   for (const r of nuevo) {
     if (!r.ene_q) continue;
     const hu = effHU(r); if (!hu) continue;
@@ -609,8 +584,13 @@ function renderDetalle(rows) {
     const hu = effHU(r); if (!hu) continue;
     if (!huR[hu]) huR[hu] = 0; huR[hu] += r.ene_q;
   }
+  for (const r of old_) {
+    if (!r.ene_q) continue;
+    const hu = effHU(r); if (!hu) continue;
+    if (!huO[hu]) huO[hu] = 0; huO[hu] += r.ene_q;
+  }
 
-  const allHU = [...new Set([...Object.keys(huN), ...Object.keys(huR)])];
+  const allHU = [...new Set([...Object.keys(huN), ...Object.keys(huR), ...Object.keys(huO)])];
   allHU.sort((a,b) => ((huN[b]||0)+(huR[b]||0)) - ((huN[a]||0)+(huR[a]||0)));
 
   // Agrupar cola como "others"
@@ -620,29 +600,33 @@ function renderDetalle(rows) {
   const labels  = [...topHU, ...(otherHU.length ? ['others'] : [])];
   const getN = k => k==='others' ? otherHU.reduce((s,x)=>s+(huN[x]||0),0) : (huN[k]||0);
   const getR = k => k==='others' ? otherHU.reduce((s,x)=>s+(huR[x]||0),0) : (huR[k]||0);
+  const getO = k => k==='others' ? otherHU.reduce((s,x)=>s+(huO[x]||0),0) : (huO[k]||0);
 
-  // ── Chart 1: volumen grouped bar ─────────────────────────────────────────
+  // ── Chart 1: volumen grouped bar (New / L90D / Old) ─────────────────────
   mkChart('c-hureason','bar',{
     labels,
     datasets:[
-      {label:'Nueva dirección', data:labels.map(getN), backgroundColor:'#FFE600', borderRadius:4},
-      {label:'L90D',       data:labels.map(getR), backgroundColor:'#555555', borderRadius:4}
+      {label:'New',  data:labels.map(getN), backgroundColor:'#FFE600', borderRadius:4},
+      {label:'L90D', data:labels.map(getR), backgroundColor:'#555555', borderRadius:4},
+      {label:'Old',  data:labels.map(getO), backgroundColor:'#3A7A5A', borderRadius:4}
     ]
   },{
     scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:G}},x:{grid:{display:false},ticks:{font:{size:10}}}},
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)} ENE`}}}
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)} ENE`}}}
   });
 
-  // ── Chart 2: distribución % stacked horizontal ───────────────────────────
+  // ── Chart 2: distribución % stacked horizontal (New / L90D / Old) ──────
   const totN = labels.reduce((s,k)=>s+getN(k),0);
   const totR = labels.reduce((s,k)=>s+getR(k),0);
+  const totO = labels.reduce((s,k)=>s+getO(k),0);
   mkChart('c-hu-dist','bar',{
-    labels: ['Nueva', 'Recurrente'],
+    labels: ['New', 'L90D', 'Old'],
     datasets: labels.map(k => ({
       label: k,
       data: [
         totN>0 ? +(getN(k)/totN*100).toFixed(2) : 0,
         totR>0 ? +(getR(k)/totR*100).toFixed(2) : 0,
+        totO>0 ? +(getO(k)/totO*100).toFixed(2) : 0,
       ],
       backgroundColor: HU_COLORS[k]||'#666',
       borderWidth: 0,
@@ -693,7 +677,9 @@ function renderDetalle(rows) {
 }
 
 // ── render ENE × Segmento ─────────────────────────────────────────────────
-function renderSegmento(rows) {
+function renderSegmento(_ignored) {
+  // este tab siempre muestra los 3 segmentos — ignora el filtro de btype
+  const rows = filteredNoBtype();
   const VERTICALS = [['Cards (credit)','Crédito'], ['Cards (debit)','Débito']];
   const G = '#252525';
 
@@ -702,8 +688,8 @@ function renderSegmento(rows) {
     const sr = rows.filter(r=>r.shp_vertical_2===v && r.buyer_type===t);
     return {q:sr.reduce((s,r)=>s+r.q,0), e:sr.reduce((s,r)=>s+r.ene_q,0)};
   }
-  const cn=seg('Cards (credit)','New'), cr=seg('Cards (credit)','L90D');
-  const dn=seg('Cards (debit)','New'),  dr=seg('Cards (debit)','L90D');
+  const cn=seg('Cards (credit)','New'), cr=seg('Cards (credit)','L90D'), co=seg('Cards (credit)','Old');
+  const dn=seg('Cards (debit)','New'),  dr=seg('Cards (debit)','L90D'),  do_=seg('Cards (debit)','Old');
 
   // ── Insights auto-generados ──────────────────────────────────────────────
   const ratioC = (pctN(cr.e,cr.q) > 0) ? (pctN(cn.e,cn.q)/pctN(cr.e,cr.q)).toFixed(1) : '—';
@@ -764,12 +750,14 @@ function renderSegmento(rows) {
     </div>`
   ).join('');
 
-  // ── KPIs 2×2 ────────────────────────────────────────────────────────────
+  // ── KPIs 3×2 ────────────────────────────────────────────────────────────
   const kpiItems = [
-    [cn, 'Crédito · New', 'yellow'],
-    [cr, 'Crédito · Recurrente', 'dim'],
-    [dn, 'Débito · New', 'yellow'],
-    [dr, 'Débito · Recurrente', 'dim'],
+    [cn, 'Crédito · New',  'yellow'],
+    [cr, 'Crédito · L90D', 'dim'],
+    [co, 'Crédito · Old',  'green'],
+    [dn, 'Débito · New',   'yellow'],
+    [dr, 'Débito · L90D',  'dim'],
+    [do_,'Débito · Old',   'green'],
   ].map(([s, label, cls]) =>
     `<div class="kpi ${cls}">
       <div class="kpi-label">${label}</div>
@@ -779,33 +767,31 @@ function renderSegmento(rows) {
   );
   document.getElementById('seg-kpis').innerHTML = kpiItems.join('');
 
-  // ── Grouped bar: ENE% ────────────────────────────────────────────────────
+  // ── Grouped bar: ENE% (New / L90D / Old) ────────────────────────────────
   const labels = VERTICALS.map(([,l])=>l);
-  const nuevoENE = VERTICALS.map(([v]) => { const s=seg(v,'New'); return pctN(s.e,s.q); });
-  const recurENE = VERTICALS.map(([v]) => { const s=seg(v,'L90D'); return pctN(s.e,s.q); });
   mkChart('c-seg-bar', 'bar', {
     labels,
     datasets: [
-      {label:'Nueva dirección', data:nuevoENE, backgroundColor:'#FFE600', borderRadius:5},
-      {label:'L90D',       data:recurENE, backgroundColor:'#3A3A3A', borderRadius:5}
+      {label:'New',  data:VERTICALS.map(([v]) => { const s=seg(v,'New');  return pctN(s.e,s.q); }), backgroundColor:'#FFE600', borderRadius:5},
+      {label:'L90D', data:VERTICALS.map(([v]) => { const s=seg(v,'L90D'); return pctN(s.e,s.q); }), backgroundColor:'#555555', borderRadius:5},
+      {label:'Old',  data:VERTICALS.map(([v]) => { const s=seg(v,'Old');  return pctN(s.e,s.q); }), backgroundColor:'#3A7A5A', borderRadius:5}
     ]
   }, {
     scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:G}},x:{grid:{display:false}}},
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`}}}
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`}}}
   });
 
-  // ── Stacked bar: volumen ─────────────────────────────────────────────────
-  const nuevoVol = VERTICALS.map(([v]) => seg(v,'New').q);
-  const recurVol = VERTICALS.map(([v]) => seg(v,'L90D').q);
+  // ── Stacked bar: volumen (New / L90D / Old) ─────────────────────────────
   mkChart('c-seg-vol', 'bar', {
     labels,
     datasets: [
-      {label:'Nueva dirección', data:nuevoVol, backgroundColor:'#FFE600'},
-      {label:'L90D',       data:recurVol, backgroundColor:'#3A3A3A'}
+      {label:'New',  data:VERTICALS.map(([v]) => seg(v,'New').q),  backgroundColor:'#FFE600'},
+      {label:'L90D', data:VERTICALS.map(([v]) => seg(v,'L90D').q), backgroundColor:'#555555'},
+      {label:'Old',  data:VERTICALS.map(([v]) => seg(v,'Old').q),  backgroundColor:'#3A7A5A'}
     ]
   }, {
     scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:G},stacked:true},x:{grid:{display:false},stacked:true}},
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}}
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#888',boxWidth:12}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}}
   });
 
   // ── Tendencia: 4 líneas ──────────────────────────────────────────────────
@@ -819,10 +805,12 @@ function renderSegmento(rows) {
   mkChart('c-seg-tend', 'line', {
     labels: mesesFilt,
     datasets: [
-      {label:'Crédito · New',      data:segLine('Cards (credit)','New'),      borderColor:'#FFE600',backgroundColor:'rgba(255,230,0,.07)',    fill:true,  borderWidth:2},
-      {label:'Crédito · Recurrente', data:segLine('Cards (credit)','L90D'), borderColor:'#887700',backgroundColor:'transparent',             fill:false, borderWidth:2, borderDash:[5,4]},
-      {label:'Débito · New',       data:segLine('Cards (debit)','New'),       borderColor:'#EEEEEE',backgroundColor:'rgba(238,238,238,.05)',   fill:true,  borderWidth:2},
-      {label:'Débito · Recurrente',  data:segLine('Cards (debit)','L90D'),  borderColor:'#555555',backgroundColor:'transparent',             fill:false, borderWidth:2, borderDash:[5,4]}
+      {label:'Crédito · New',  data:segLine('Cards (credit)','New'),  borderColor:'#FFE600',backgroundColor:'rgba(255,230,0,.07)',  fill:true,  borderWidth:2},
+      {label:'Crédito · L90D', data:segLine('Cards (credit)','L90D'), borderColor:'#887700',backgroundColor:'transparent',          fill:false, borderWidth:2, borderDash:[5,4]},
+      {label:'Crédito · Old',  data:segLine('Cards (credit)','Old'),  borderColor:'#3A9A6A',backgroundColor:'transparent',          fill:false, borderWidth:2, borderDash:[2,4]},
+      {label:'Débito · New',   data:segLine('Cards (debit)','New'),   borderColor:'#EEEEEE',backgroundColor:'rgba(238,238,238,.05)',fill:true,  borderWidth:2},
+      {label:'Débito · L90D',  data:segLine('Cards (debit)','L90D'),  borderColor:'#555555',backgroundColor:'transparent',          fill:false, borderWidth:2, borderDash:[5,4]},
+      {label:'Débito · Old',   data:segLine('Cards (debit)','Old'),   borderColor:'#2A6A4A',backgroundColor:'transparent',          fill:false, borderWidth:2, borderDash:[2,4]}
     ]
   }, {
     scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:G}},x:{grid:{display:false}}},
@@ -839,74 +827,79 @@ function renderGeo(rows) {
   // ── tabla distribución: % de nuevas y % de recurrentes por valor ────────
   function buildGeoTable(field, containerId, eneCanvasId) {
     const vals = [...new Set(rows.map(r => r[field] || '(vacío)'))].sort();
-    const nuevo = rows.filter(r => r.buyer_type === 'New');
-    const recur = rows.filter(r => r.buyer_type === 'L90D');
-    const totN = nuevo.reduce((s,r)=>s+r.q,0);
-    const totR = recur.reduce((s,r)=>s+r.q,0);
+    const rNew  = rows.filter(r => r.buyer_type === 'New');
+    const rL90D = rows.filter(r => r.buyer_type === 'L90D');
+    const rOld  = rows.filter(r => r.buyer_type === 'Old');
+    const totN = rNew.reduce((s,r)=>s+r.q,0);
+    const totL = rL90D.reduce((s,r)=>s+r.q,0);
+    const totO = rOld.reduce((s,r)=>s+r.q,0);
 
     const agg = vals.map(v => {
-      const sn = nuevo.filter(r => (r[field]||'(vacío)') === v);
-      const sr = recur.filter(r => (r[field]||'(vacío)') === v);
+      if (v === '(vacío)') return null;
+      const sn = rNew.filter(r => (r[field]||'(vacío)') === v);
+      const sl = rL90D.filter(r => (r[field]||'(vacío)') === v);
+      const so = rOld.filter(r => (r[field]||'(vacío)') === v);
       const nq = sn.reduce((s,r)=>s+r.q,0), ne = sn.reduce((s,r)=>s+r.ene_q,0);
-      const rq = sr.reduce((s,r)=>s+r.q,0), re = sr.reduce((s,r)=>s+r.ene_q,0);
-      return {v, nq, ne, rq, re,
+      const lq = sl.reduce((s,r)=>s+r.q,0), le = sl.reduce((s,r)=>s+r.ene_q,0);
+      const oq = so.reduce((s,r)=>s+r.q,0), oe = so.reduce((s,r)=>s+r.ene_q,0);
+      return {v, nq, ne, lq, le, oq, oe,
         npct: totN > 0 ? nq/totN*100 : 0,
-        rpct: totR > 0 ? rq/totR*100 : 0,
-        nene: pctN(ne,nq), rene: pctN(re,rq)
+        lpct: totL > 0 ? lq/totL*100 : 0,
+        opct: totO > 0 ? oq/totO*100 : 0,
+        nene: pctN(ne,nq), lene: pctN(le,lq), oene: pctN(oe,oq)
       };
-    }).sort((a,b) => (b.nq+b.rq) - (a.nq+a.rq));
+    }).filter(Boolean).sort((a,b) => (b.nq+b.lq+b.oq) - (a.nq+a.lq+a.oq));
 
     function eneClr(p) {
       return p < 2 ? '#00A650' : p < 4 ? '#FF8800' : '#FF4444';
     }
-    function diffClr(d) {
-      return Math.abs(d) < 2 ? '#666' : d > 0 ? '#FFE600' : '#888';
-    }
 
-    const dataRows = agg.map(a => {
-      const diff = a.npct - a.rpct;
-      return `<tr>
-        <td style="color:#FFF;font-weight:600">${a.v}</td>
-        <td style="text-align:right;color:#FFE600">${a.npct.toFixed(1)}%</td>
-        <td style="text-align:right;color:#888">${a.rpct.toFixed(1)}%</td>
-        <td style="text-align:right;color:${diffClr(diff)};font-size:10px">${diff>0?'+':''}${diff.toFixed(1)}pp</td>
-        <td style="text-align:right;color:${eneClr(a.nene)};font-weight:700">${a.nene.toFixed(1)}%</td>
-        <td style="text-align:right;color:${eneClr(a.rene)};font-weight:700">${a.rene.toFixed(1)}%</td>
-      </tr>`;
-    }).join('');
+    const dataRows = agg.map(a => `<tr>
+      <td style="color:#FFF;font-weight:600">${a.v}</td>
+      <td style="text-align:right;color:#FFE600">${a.npct.toFixed(1)}%</td>
+      <td style="text-align:right;color:#888">${a.lpct.toFixed(1)}%</td>
+      <td style="text-align:right;color:#3A9A6A">${a.opct.toFixed(1)}%</td>
+      <td style="text-align:right;color:${eneClr(a.nene)};font-weight:700">${a.nene.toFixed(1)}%</td>
+      <td style="text-align:right;color:${eneClr(a.lene)};font-weight:700">${a.lene.toFixed(1)}%</td>
+      <td style="text-align:right;color:${eneClr(a.oene)};font-weight:700">${a.oene.toFixed(1)}%</td>
+    </tr>`).join('');
 
-    const totNene = pctN(nuevo.reduce((s,r)=>s+r.ene_q,0), totN);
-    const totRene = pctN(recur.reduce((s,r)=>s+r.ene_q,0), totR);
+    const totNene = pctN(rNew.reduce((s,r)=>s+r.ene_q,0), totN);
+    const totLene = pctN(rL90D.reduce((s,r)=>s+r.ene_q,0), totL);
+    const totOene = pctN(rOld.reduce((s,r)=>s+r.ene_q,0), totO);
     const footRow = `<tr style="border-top:1px solid #444;background:#111">
       <td style="font-weight:700;color:#FFE600">TOTAL</td>
       <td style="text-align:right;font-weight:700;color:#FFE600">100%</td>
       <td style="text-align:right;font-weight:700;color:#888">100%</td>
-      <td></td>
+      <td style="text-align:right;font-weight:700;color:#3A9A6A">100%</td>
       <td style="text-align:right;font-weight:700;color:${eneClr(totNene)}">${totNene.toFixed(1)}%</td>
-      <td style="text-align:right;font-weight:700;color:${eneClr(totRene)}">${totRene.toFixed(1)}%</td>
+      <td style="text-align:right;font-weight:700;color:${eneClr(totLene)}">${totLene.toFixed(1)}%</td>
+      <td style="text-align:right;font-weight:700;color:${eneClr(totOene)}">${totOene.toFixed(1)}%</td>
     </tr>`;
 
     document.getElementById(containerId).innerHTML = `
       <table>
         <thead><tr>
           <th>Valor</th>
-          <th style="text-align:right;color:#FFE600">% Nuevas</th>
-          <th style="text-align:right;color:#888">% Recurrentes</th>
-          <th style="text-align:right">Δ</th>
-          <th style="text-align:right;color:#FF4444">ENE% N</th>
-          <th style="text-align:right;color:#888">ENE% R</th>
+          <th style="text-align:right;color:#FFE600">% New</th>
+          <th style="text-align:right;color:#888">% L90D</th>
+          <th style="text-align:right;color:#3A9A6A">% Old</th>
+          <th style="text-align:right;color:#FFE600">ENE% New</th>
+          <th style="text-align:right;color:#888">ENE% L90D</th>
+          <th style="text-align:right;color:#3A9A6A">ENE% Old</th>
         </tr></thead>
         <tbody>${dataRows}</tbody>
         <tfoot>${footRow}</tfoot>
       </table>`;
 
-    // ENE% grouped bar chart
+    // ENE% grouped bar chart (New / L90D / Old)
     const G = '#252525';
     mkChart(eneCanvasId, 'bar', {
       labels: agg.map(a=>a.v),
       datasets: [
-        {label:'New',      data:agg.map(a=>a.nene), backgroundColor:'#FFE600', borderRadius:4},
-        {label:'L90D', data:agg.map(a=>a.rene), backgroundColor:'#555555', borderRadius:4}
+        {label:'New',  data:agg.map(a=>a.nene), backgroundColor:'#FFE600', borderRadius:4},
+        {label:'L90D', data:agg.map(a=>a.lene), backgroundColor:'#555555', borderRadius:4},
+        {label:'Old',  data:agg.map(a=>a.oene), backgroundColor:'#3A7A5A', borderRadius:4}
       ]
     }, {
       scales:{ y:{ticks:{callback:v=>v+'%'},grid:{color:G}}, x:{grid:{display:false},ticks:{font:{size:10}}}},
@@ -996,11 +989,12 @@ function renderGeo(rows) {
     const t = r.add_geolocation_type || '(vacío)';
     const s = r.add_geolocation_source || '(vacío)';
     const k = t + ' ' + s;
-    if (!cross[k]) cross[k] = {q:0,ene:0,nq:0,nene:0,rq:0,rene:0};
+    if (!cross[k]) cross[k] = {q:0,ene:0,nq:0,nene:0,lq:0,lene:0,oq:0,oene:0};
     cross[k].q    += r.q;
     cross[k].ene  += r.ene_q;
-    if (r.buyer_type === 'New') { cross[k].nq += r.q; cross[k].nene += r.ene_q; }
-    else                          { cross[k].rq += r.q; cross[k].rene += r.ene_q; }
+    if (r.buyer_type === 'New')  { cross[k].nq += r.q; cross[k].nene += r.ene_q; }
+    else if (r.buyer_type === 'L90D') { cross[k].lq += r.q; cross[k].lene += r.ene_q; }
+    else                               { cross[k].oq += r.q; cross[k].oene += r.ene_q; }
   }
 
   function hmColor(p) {
@@ -1027,11 +1021,12 @@ function renderGeo(rows) {
       rtq += c.q; rte += c.ene;
       const ep = pctN(c.ene, c.q);
       const np = pctN(c.nene, c.nq);
-      const rp = pctN(c.rene, c.rq);
+      const lp = pctN(c.lene, c.lq);
+      const op = pctN(c.oene, c.oq);
       return `<td style="background:${hmColor(ep)}">
         <div class="hm-cell">${ep.toFixed(1)}%</div>
         <div class="hm-sub">${fmt(c.q)}</div>
-        <div class="hm-nr">N:${np.toFixed(0)}% R:${rp.toFixed(0)}%</div>
+        <div class="hm-nr">N:${np.toFixed(0)}% L:${lp.toFixed(0)}% O:${op.toFixed(0)}%</div>
       </td>`;
     });
     const rtp = pctN(rte, rtq);
