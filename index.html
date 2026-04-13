@@ -156,7 +156,6 @@ tr:hover td{background:#222222}
   <div class="tab" data-tab="detalle">ENE Causas</div>
   <div class="tab active" data-tab="segmento">ENE × Segmento</div>
   <div class="tab" data-tab="geo">Geolocalización</div>
-  <div class="tab" data-tab="rbr">Rechaza Paquete</div>
 </div>
 
 <!-- ── TAB RESUMEN ─────────────────────────────────────────────────────────── -->
@@ -289,35 +288,6 @@ tr:hover td{background:#222222}
       <div class="section-title">Distribución por Tipo — New / L90D / Old</div>
       <div id="geo-type-table"></div>
     </div>
-
-<!-- ── TAB RECHAZA PAQUETE ──────────────────────────────────────────────── -->
-<div id="view-rbr" class="view">
-  <div class="kpi-row" id="rbr-kpis"></div>
-  <div class="two-col">
-    <div class="section">
-      <div class="section-title">Tipo de Direccion — RBR vs Todo ENE</div>
-      <div id="rbr-type-table"></div>
-    </div>
-    <div class="section">
-      <div class="section-title">Fuente de Geolocalizacion — RBR</div>
-      <div id="rbr-src-table"></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">Matriz Tipo x Fuente — Rechaza Paquete — % del total RBR · calor = intensidad</div>
-    <div id="rbr-matrix"></div>
-  </div>
-  <div class="two-col">
-    <div class="section">
-      <div class="section-title">Por Site</div>
-      <div id="rbr-site-table"></div>
-    </div>
-    <div class="section">
-      <div class="section-title">Por Segmento de Comprador</div>
-      <div id="rbr-btype-table"></div>
-    </div>
-  </div>
-</div>
     <div class="section">
       <div class="section-title">Distribución por Fuente — New / L90D / Old</div>
       <div id="geo-src-table"></div>
@@ -415,163 +385,6 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
   t.classList.add('active');
   document.getElementById('view-'+t.dataset.tab).classList.add('active');
-// ── Rechaza Paquete tab ────────────────────────────────────────────────────
-function renderRBR() {
-  const SITE_F = window._siteFilter || null;
-  const nd  = DATA.filter(r => r.shp_status === 'NOT_DELIVERED');
-  const rbr = DATA.filter(r => r.shp_status === 'NOT_DELIVERED' && r.shp_hu_reason === 'refused_by_buyer'
-    && (!SITE_F || r.sit_site_id === SITE_F));
-  const ndF = nd.filter(r => !SITE_F || r.sit_site_id === SITE_F);
-
-  const sum = arr => arr.reduce((a,r) => a + r.q, 0);
-  const rbrTot = sum(rbr);
-  const ndTot  = sum(ndF);
-  if (!rbrTot) { document.getElementById('rbr-kpis').innerHTML='<p style="color:#555">Sin datos</p>'; return; }
-
-  const vg  = sum(rbr.filter(r => r.add_geolocation_type));
-  const pct = v => rbrTot ? (v/rbrTot*100).toFixed(1)+'%' : '-';
-  const pp  = (a,b) => { const d=(a-b); return (d>=0?'+':'')+d.toFixed(1)+'pp'; }
-
-  // ── KPIs ──
-  document.getElementById('rbr-kpis').innerHTML = `
-    <div class="kpi yellow"><div class="kpi-label">Rechaza Paquete</div>
-      <div class="kpi-val">${(rbrTot/1000).toFixed(1)}k</div>
-      <div class="kpi-sub">${(rbrTot/ndTot*100).toFixed(1)}% del ENE filtrado</div></div>
-    <div class="kpi green"><div class="kpi-label">Verified Geo (VG%)</div>
-      <div class="kpi-val">${(vg/rbrTot*100).toFixed(1)}%</div>
-      <div class="kpi-sub">${(vg/1000).toFixed(1)}k env con geocod</div></div>
-    <div class="kpi"><div class="kpi-label">ROOFTOP</div>
-      <div class="kpi-val">${pct(sum(rbr.filter(r=>r.add_geolocation_type==='ROOFTOP')))}</div>
-      <div class="kpi-sub">Mayor precision de geo</div></div>
-    <div class="kpi"><div class="kpi-label">New buyer</div>
-      <div class="kpi-val">${pct(sum(rbr.filter(r=>r.buyer_type==='New')))}</div>
-      <div class="kpi-sub">Compradores nuevos en RBR</div></div>`;
-
-  // ── Tipo table ──
-  const TYPES = ['ROOFTOP','RANGE_INTERPOLATED','GEOMETRIC_CENTER','APPROXIMATE',null];
-  const TYPE_LABEL = {'ROOFTOP':'ROOFTOP','RANGE_INTERPOLATED':'RANGE_INTERP.','GEOMETRIC_CENTER':'GEOM. CENTER','APPROXIMATE':'APPROXIMATE',null:'SIN GEO'};
-  let th = `<table><thead><tr>
-    <th>Tipo</th><th style="text-align:right">RBR</th><th style="text-align:right">% RBR</th>
-    <th style="text-align:right">% todo ENE</th><th style="text-align:right">Diff</th></tr></thead><tbody>`;
-  for (const t of TYPES) {
-    const rv = sum(rbr.filter(r => r.add_geolocation_type === t));
-    const av = sum(ndF.filter(r => r.add_geolocation_type === t));
-    if (!rv && !av) continue;
-    const rp = rbrTot ? rv/rbrTot*100 : 0;
-    const ap = ndTot  ? av/ndTot*100  : 0;
-    const d  = rp - ap;
-    const dc = d > 1 ? 'color:#FF8C00' : d < -1 ? 'color:#00A650' : 'color:#555';
-    th += `<tr><td>${TYPE_LABEL[t]}</td>
-      <td style="text-align:right">${rv.toLocaleString('es-AR')}</td>
-      <td style="text-align:right;color:#FFE600">${rp.toFixed(1)}%</td>
-      <td style="text-align:right;color:#888">${ap.toFixed(1)}%</td>
-      <td style="text-align:right;font-weight:700;${dc}">${d>=0?'+':''}${d.toFixed(1)}pp</td></tr>`;
-  }
-  th += `</tbody></table>`;
-  document.getElementById('rbr-type-table').innerHTML = th;
-
-  // ── Fuente table ──
-  const srcMap = {};
-  rbr.forEach(r => {
-    const s = r.add_geolocation_source || 'sin fuente';
-    srcMap[s] = (srcMap[s]||0) + r.q;
-  });
-  const srcs = Object.entries(srcMap).sort((a,b) => b[1]-a[1]);
-  let sh = `<table><thead><tr><th>Fuente</th><th style="text-align:right">Q</th><th style="text-align:right">%</th></tr></thead><tbody>`;
-  for (const [s,v] of srcs) {
-    const p = (v/rbrTot*100);
-    const bar = Math.round(p*2);
-    sh += `<tr><td>${s}</td>
-      <td style="text-align:right">${v.toLocaleString('es-AR')}</td>
-      <td style="text-align:right"><span style="color:#FFE600;font-weight:700">${p.toFixed(1)}%</span>
-        <span class="ene-bar" style="width:${bar}px;background:#FFE600;opacity:.4"></span></td></tr>`;
-  }
-  sh += `</tbody></table>`;
-  document.getElementById('rbr-src-table').innerHTML = sh;
-
-  // ── Matriz tipo x fuente ──
-  const mTypes   = ['ROOFTOP','RANGE_INTERPOLATED','GEOMETRIC_CENTER','APPROXIMATE',null];
-  const allSrcs  = [...new Set(rbr.map(r => r.add_geolocation_source || null))];
-  const srcOrder = allSrcs.sort((a,b) => {
-    const va = sum(rbr.filter(r=>(r.add_geolocation_source||null)===a));
-    const vb = sum(rbr.filter(r=>(r.add_geolocation_source||null)===b));
-    return vb-va;
-  });
-  const maxVal = Math.max(...mTypes.map(t => Math.max(...srcOrder.map(s =>
-    sum(rbr.filter(r => r.add_geolocation_type===t && (r.add_geolocation_source||null)===s))))));
-
-  let mx = `<div class="hm-wrap"><table class="hm-table"><thead><tr>
-    <th class="hm-rh">Tipo \ Fuente</th>
-    ${srcOrder.map(s=>`<th>${(s||'SIN').replace('geolocation-','geo-').replace('corrections-','corr-')}</th>`).join('')}
-    <th style="border-left:2px solid #444">Total</th></tr></thead><tbody>`;
-
-  let colTots = Object.fromEntries(srcOrder.map(s=>[s,0]));
-  let grandTot = 0;
-  for (const t of mTypes) {
-    const rowTot = sum(rbr.filter(r => r.add_geolocation_type===t));
-    if (!rowTot) continue;
-    mx += `<tr><td class="hm-rh">${TYPE_LABEL[t]}</td>`;
-    for (const s of srcOrder) {
-      const v = sum(rbr.filter(r => r.add_geolocation_type===t && (r.add_geolocation_source||null)===s));
-      colTots[s] = (colTots[s]||0) + v;
-      if (!v) { mx += `<td style="color:#333">—</td>`; continue; }
-      const p = v/rbrTot*100;
-      const intensity = maxVal ? v/maxVal : 0;
-      const bg = intensity > 0.6 ? '#7B2D00' : intensity > 0.35 ? '#5C3A00' : intensity > 0.15 ? '#3A2E00' : '#222';
-      const col = intensity > 0.35 ? '#FFD700' : '#FFE600';
-      mx += `<td style="background:${bg}"><span class="hm-cell" style="color:${col}">${p.toFixed(1)}%</span></td>`;
-    }
-    const rp = rowTot/rbrTot*100;
-    mx += `<td style="border-left:2px solid #444;font-weight:700;color:#FFE600">${rp.toFixed(1)}%</td></tr>`;
-    grandTot += rowTot;
-  }
-  // fila totales por columna
-  mx += `<tr class="hm-total-row"><td class="hm-rh" style="color:#FFE600;font-weight:700">Total</td>`;
-  for (const s of srcOrder) {
-    const v = colTots[s]||0;
-    mx += `<td style="border-top:2px solid #444;font-weight:700;color:#FFE600">${(v/rbrTot*100).toFixed(1)}%</td>`;
-  }
-  mx += `<td style="border:2px solid #FFE600;font-weight:800;color:#FFE600">100%</td></tr>`;
-  mx += `</tbody></table></div>`;
-  document.getElementById('rbr-matrix').innerHTML = mx;
-
-  // ── Por site ──
-  const siteRows = {};
-  rbr.forEach(r => { siteRows[r.sit_site_id] = (siteRows[r.sit_site_id]||0)+r.q; });
-  const siteEne = {};
-  ndF.forEach(r => { siteEne[r.sit_site_id] = (siteEne[r.sit_site_id]||0)+r.q; });
-  let st = `<table><thead><tr><th>Site</th><th style="text-align:right">RBR</th>
-    <th style="text-align:right">% ENE site</th><th style="text-align:right">% de todo RBR</th></tr></thead><tbody>`;
-  for (const [site, v] of Object.entries(siteRows).sort((a,b)=>b[1]-a[1])) {
-    const ep = siteEne[site] ? (v/siteEne[site]*100).toFixed(1)+'%' : '-';
-    const rp = (v/rbrTot*100).toFixed(1)+'%';
-    st += `<tr><td style="font-weight:700;color:#FFE600">${site}</td>
-      <td style="text-align:right">${v.toLocaleString('es-AR')}</td>
-      <td style="text-align:right;color:#FF8C00;font-weight:700">${ep}</td>
-      <td style="text-align:right;color:#888">${rp}</td></tr>`;
-  }
-  st += `</tbody></table>`;
-  document.getElementById('rbr-site-table').innerHTML = st;
-
-  // ── Por buyer type ──
-  const btRows = {};
-  rbr.forEach(r => { btRows[r.buyer_type] = (btRows[r.buyer_type]||0)+r.q; });
-  const ORDER = ['New','L90D','Old'];
-  let bt = `<table><thead><tr><th>Segmento</th><th style="text-align:right">RBR</th>
-    <th style="text-align:right">% del total RBR</th></tr></thead><tbody>`;
-  for (const b of ORDER) {
-    const v = btRows[b]||0;
-    if (!v) continue;
-    const p = (v/rbrTot*100).toFixed(1);
-    const col = b==='New' ? '#FF4444' : b==='L90D' ? '#00A650' : '#888';
-    bt += `<tr><td style="font-weight:700;color:${col}">${b}</td>
-      <td style="text-align:right">${v.toLocaleString('es-AR')}</td>
-      <td style="text-align:right;font-weight:700;color:${col}">${p}%</td></tr>`;
-  }
-  bt += `</tbody></table>`;
-  document.getElementById('rbr-btype-table').innerHTML = bt;
-}
-
   render();
 }));
 
@@ -1456,7 +1269,6 @@ function render() {
   }
 }
 
-renderRBR();
 render();
 </script>
 </body>
