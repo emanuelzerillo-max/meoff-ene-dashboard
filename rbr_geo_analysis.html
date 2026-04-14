@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Rechaza Paquete &mdash; Geo Analysis</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0F0F0F;color:#FFF;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;padding:24px 28px}
+h1{font-size:18px;font-weight:800;color:#FFE600;margin-bottom:4px}
+.sub{font-size:11px;color:#555;margin-bottom:16px}
+.pills{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.pill{padding:5px 16px;border-radius:20px;cursor:pointer;border:1.5px solid #333;background:#0F0F0F;color:#666;font-size:11px;font-weight:700;transition:all .15s;user-select:none}
+.pill.active{background:#FFE600;border-color:#FFE600;color:#000;box-shadow:0 2px 8px rgba(255,230,0,.25)}
+.pill:hover:not(.active){border-color:#555;color:#CCC}
+.pill-label{font-size:10px;color:#444;font-weight:600;margin-right:4px;text-transform:uppercase;letter-spacing:.06em}
+.kpi-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.kpi{background:#1A1A1A;border:1px solid #252525;border-radius:12px;padding:14px 18px;min-width:150px;flex:1}
+.kpi-label{font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:800;line-height:1}
+.kpi-sub{font-size:11px;color:#555;margin-top:5px}
+.kpi.yellow .kpi-val{color:#FFE600}
+.kpi.green  .kpi-val{color:#00A650}
+.kpi.red    .kpi-val{color:#FF4444}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.section{background:#1A1A1A;border:1px solid #252525;border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.stitle{font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#111;color:#555;font-size:10px;font-weight:700;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid #252525}
+td{padding:7px 10px;border-bottom:1px solid #1F1F1F;color:#CCC}
+tr:hover td{background:#222}
+.hm-wrap{overflow-x:auto}
+.hm-table{border-collapse:collapse;font-size:11px;min-width:100%}
+.hm-table th,.hm-table td{padding:6px 9px;border:1px solid #252525;text-align:center;white-space:nowrap}
+.hm-table th{background:#111;color:#555;font-size:9px;font-weight:700;text-transform:uppercase}
+.hm-rh{text-align:left!important;background:#111!important;font-weight:700;color:#CCC!important;min-width:130px}
+.note{font-size:10px;color:#444;margin-top:16px}
+</style>
+</head>
+<body>
+<h1>Rechaza Paquete (refused_by_buyer)</h1>
+<div class="sub">Cards (cr&eacute;dito + d&eacute;bito) &nbsp;|&nbsp; MEOFF &nbsp;|&nbsp; Dic 2025 &ndash; Mar 2026</div>
+<div class="pills">
+  <span class="pill-label">Site</span>
+  <div class="pill active" onclick="setSite('TODOS',this)">TODOS</div>
+  <div class="pill" onclick="setSite('MLA',this)">MLA</div>
+  <div class="pill" onclick="setSite('MLB',this)">MLB</div>
+  <div class="pill" onclick="setSite('MLM',this)">MLM</div>
+</div>
+<div class="kpi-row" id="kpis"></div>
+<div class="two-col">
+  <div class="section">
+    <div class="stitle">Tipo de Direcci&oacute;n &mdash; RBR vs Todo ENE</div>
+    <div id="type-table"></div>
+  </div>
+  <div class="section">
+    <div class="stitle">Fuente de Geolocalizaci&oacute;n &mdash; RBR</div>
+    <div id="src-table"></div>
+  </div>
+</div>
+<div class="section">
+  <div class="stitle">Matriz Tipo &times; Fuente &mdash; % del total RBR</div>
+  <div class="hm-wrap" id="matrix"></div>
+</div>
+<div class="two-col">
+  <div class="section" id="site-section">
+    <div class="stitle">Por Site</div>
+    <div id="site-table"></div>
+  </div>
+  <div class="section">
+    <div class="stitle">Por Segmento de Comprador</div>
+    <div id="bt-table"></div>
+  </div>
+</div>
+<div class="note">VG% = envios con RCV_ADDR_VERIFIED_GEO = 1 &nbsp;|&nbsp; Fuente: meoff_ene.json</div>
+<script>
+const RAW = {"tlabel": {"ROOFTOP": "ROOFTOP", "RANGE_INTERPOLATED": "RANGE INTERP.", "GEOMETRIC_CENTER": "GEOM. CENTER", "APPROXIMATE": "APPROXIMATE", "None": "SIN GEO"}, "sites": {"TODOS": {"rbrT": 26501, "ndT": 100647, "vg": 7554, "nvg": 18947, "typeCmp": {"ROOFTOP": {"rbrP": 61.2, "allP": 60.9, "rbrN": 16207}, "RANGE_INTERPOLATED": {"rbrP": 21.2, "allP": 18.0, "rbrN": 5630}, "GEOMETRIC_CENTER": {"rbrP": 10.8, "allP": 12.7, "rbrN": 2863}, "APPROXIMATE": {"rbrP": 6.4, "allP": 7.8, "rbrN": 1690}, "None": {"rbrP": 0.4, "allP": 0.6, "rbrN": 111}}, "matrix": {"None": {"None": 111}, "APPROXIMATE": {"map-verified": 315, "None": 9, "google-maps": 1348, "photo-driver": 10, "geolocation-feedback": 5, "geolocation-visits": 3}, "GEOMETRIC_CENTER": {"photo-driver": 66, "map-verified": 1221, "None": 5, "google-maps": 1555, "geolocation-feedback": 7, "logistics-feedback": 7, "corrections-api": 2}, "RANGE_INTERPOLATED": {"map-verified": 506, "corrections-api": 2707, "None": 57, "google-maps": 2297, "geolocation-visits": 36, "photo-driver": 24, "logistics-feedback": 2, "user-defined": 1}, "ROOFTOP": {"corrections-api": 5314, "map-verified": 1713, "geolocation-feedback": 250, "google-maps": 5145, "geolocation-visits": 3462, "logistics-feedback": 22, "None": 68, "photo-driver": 92, "user-defined": 140, "here": 1}}, "srcs": ["google-maps", "corrections-api", "map-verified", "geolocation-visits", "geolocation-feedback", "None", "photo-driver", "user-defined", "logistics-feedback", "here"], "btCnt": {"L90D": 6141, "Old": 10887, "New": 9473}, "siteCnt": {"MLA": 2147, "MLB": 17150, "MLM": 7204}, "siteEne": {"MLA": 8425, "MLB": 56520, "MLM": 35702}}, "MLA": {"rbrT": 2147, "ndT": 8425, "vg": 726, "nvg": 1421, "typeCmp": {"ROOFTOP": {"rbrP": 63.4, "allP": 50.6, "rbrN": 1362}, "RANGE_INTERPOLATED": {"rbrP": 14.2, "allP": 16.6, "rbrN": 305}, "GEOMETRIC_CENTER": {"rbrP": 13.5, "allP": 19.5, "rbrN": 289}, "APPROXIMATE": {"rbrP": 5.3, "allP": 10.2, "rbrN": 113}, "None": {"rbrP": 3.6, "allP": 3.2, "rbrN": 78}}, "matrix": {"None": {"None": 78}, "APPROXIMATE": {"map-verified": 22, "None": 1, "google-maps": 88, "photo-driver": 1, "geolocation-feedback": 1}, "GEOMETRIC_CENTER": {"photo-driver": 11, "map-verified": 144, "None": 2, "google-maps": 130, "geolocation-feedback": 1, "logistics-feedback": 1}, "RANGE_INTERPOLATED": {"map-verified": 36, "corrections-api": 114, "None": 6, "google-maps": 143, "geolocation-visits": 4, "photo-driver": 2}, "ROOFTOP": {"corrections-api": 246, "map-verified": 228, "geolocation-feedback": 40, "google-maps": 293, "geolocation-visits": 537, "logistics-feedback": 7, "None": 4, "photo-driver": 6, "user-defined": 1}}, "srcs": ["google-maps", "geolocation-visits", "map-verified", "corrections-api", "None", "geolocation-feedback", "photo-driver", "logistics-feedback", "user-defined"], "btCnt": {"L90D": 960, "Old": 758, "New": 429}, "siteCnt": {"MLA": 2147}, "siteEne": {"MLA": 8425}}, "MLB": {"rbrT": 17150, "ndT": 56520, "vg": 4751, "nvg": 12399, "typeCmp": {"ROOFTOP": {"rbrP": 61.1, "allP": 64.5, "rbrN": 10481}, "RANGE_INTERPOLATED": {"rbrP": 25.2, "allP": 21.5, "rbrN": 4317}, "GEOMETRIC_CENTER": {"rbrP": 8.2, "allP": 8.6, "rbrN": 1408}, "APPROXIMATE": {"rbrP": 5.5, "allP": 5.4, "rbrN": 936}, "None": {"rbrP": 0.0, "allP": 0.1, "rbrN": 8}}, "matrix": {"None": {"None": 8}, "APPROXIMATE": {"map-verified": 18, "google-maps": 912, "None": 4, "geolocation-feedback": 1, "photo-driver": 1}, "GEOMETRIC_CENTER": {"map-verified": 520, "photo-driver": 34, "logistics-feedback": 3, "google-maps": 844, "geolocation-feedback": 5, "corrections-api": 1, "None": 1}, "RANGE_INTERPOLATED": {"None": 49, "google-maps": 1616, "corrections-api": 2333, "map-verified": 274, "photo-driver": 17, "geolocation-visits": 25, "logistics-feedback": 2, "user-defined": 1}, "ROOFTOP": {"google-maps": 3539, "photo-driver": 61, "corrections-api": 4243, "map-verified": 770, "geolocation-feedback": 150, "user-defined": 89, "geolocation-visits": 1581, "here": 1, "logistics-feedback": 8, "None": 39}}, "srcs": ["google-maps", "corrections-api", "geolocation-visits", "map-verified", "geolocation-feedback", "photo-driver", "None", "user-defined", "logistics-feedback", "here"], "btCnt": {"Old": 7315, "L90D": 3032, "New": 6803}, "siteCnt": {"MLB": 17150}, "siteEne": {"MLB": 56520}}, "MLM": {"rbrT": 7204, "ndT": 35702, "vg": 2077, "nvg": 5127, "typeCmp": {"ROOFTOP": {"rbrP": 60.6, "allP": 57.6, "rbrN": 4364}, "RANGE_INTERPOLATED": {"rbrP": 14.0, "allP": 12.9, "rbrN": 1008}, "GEOMETRIC_CENTER": {"rbrP": 16.2, "allP": 17.7, "rbrN": 1166}, "APPROXIMATE": {"rbrP": 8.9, "allP": 11.2, "rbrN": 641}, "None": {"rbrP": 0.3, "allP": 0.6, "rbrN": 25}}, "matrix": {"None": {"None": 25}, "APPROXIMATE": {"map-verified": 275, "photo-driver": 8, "google-maps": 348, "geolocation-feedback": 3, "None": 4, "geolocation-visits": 3}, "GEOMETRIC_CENTER": {"google-maps": 581, "map-verified": 557, "logistics-feedback": 3, "photo-driver": 21, "geolocation-feedback": 1, "None": 2, "corrections-api": 1}, "RANGE_INTERPOLATED": {"map-verified": 196, "geolocation-visits": 7, "google-maps": 538, "corrections-api": 260, "photo-driver": 5, "None": 2}, "ROOFTOP": {"user-defined": 50, "geolocation-visits": 1344, "map-verified": 715, "corrections-api": 825, "logistics-feedback": 7, "geolocation-feedback": 60, "photo-driver": 25, "None": 25, "google-maps": 1313}}, "srcs": ["google-maps", "map-verified", "geolocation-visits", "corrections-api", "geolocation-feedback", "photo-driver", "None", "user-defined", "logistics-feedback"], "btCnt": {"L90D": 2149, "New": 2241, "Old": 2814}, "siteCnt": {"MLM": 7204}, "siteEne": {"MLM": 35702}}}};
+const TLABEL = RAW.tlabel;
+const TORDER = ['ROOFTOP','RANGE_INTERPOLATED','GEOMETRIC_CENTER','APPROXIMATE','None'];
+const fmt = n => Math.round(n).toLocaleString('es-AR');
+
+function setSite(site, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  // hide site breakdown when a specific site is selected
+  document.getElementById('site-section').style.display = site === 'TODOS' ? '' : 'none';
+  render(RAW.sites[site]);
+}
+
+function render(D) {
+  if (!D) { document.getElementById('kpis').innerHTML = '<p style="color:#555">Sin datos</p>'; return; }
+
+  // KPIs
+  document.getElementById('kpis').innerHTML = [
+    ['yellow', 'Rechaza Paquete',    fmt(D.rbrT),                           (D.rbrT/D.ndT*100).toFixed(1)+'% del ENE'],
+    ['green',  'Verified Geo (VG%)', (D.vg/D.rbrT*100).toFixed(1)+'%',     fmt(D.vg)+' envíos con geocod'],
+    ['',       'Sin Geo',             (D.nvg/D.rbrT*100).toFixed(1)+'%',    fmt(D.nvg)+' sin geocod'],
+    ['red',    'New buyer',           ((D.btCnt['New']||0)/D.rbrT*100).toFixed(1)+'%', 'señal de fraude / intención'],
+  ].map(([cls,lbl,val,sub]) =>
+    `<div class="kpi ${cls}"><div class="kpi-label">${lbl}</div><div class="kpi-val">${val}</div><div class="kpi-sub">${sub}</div></div>`
+  ).join('');
+
+  // Type comparison
+  let th = '<table><thead><tr><th>Tipo</th><th style="text-align:right">% RBR</th><th style="text-align:right">% todo ENE</th><th style="text-align:right">Diff</th></tr></thead><tbody>';
+  for (const t of TORDER) {
+    const row = D.typeCmp[t]; if (!row || (!row.rbrP && !row.allP)) continue;
+    const d = row.rbrP - row.allP;
+    const dc = d > 1 ? '#FF8C00' : d < -1 ? '#00A650' : '#555';
+    th += `<tr><td style="font-weight:600">${TLABEL[t]||t}</td>
+      <td style="text-align:right;color:#FFE600;font-weight:700">${row.rbrP.toFixed(1)}%</td>
+      <td style="text-align:right;color:#555">${row.allP.toFixed(1)}%</td>
+      <td style="text-align:right;font-weight:700;color:${dc}">${d>=0?'+':''}${d.toFixed(1)}pp</td></tr>`;
+  }
+  document.getElementById('type-table').innerHTML = th + '</tbody></table>';
+
+  // Source table
+  const srcTots = D.srcs.map(s => [s, Object.values(D.matrix).reduce((a,r)=>a+(r[s]||0),0)])
+    .filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
+  let sh = '<table><thead><tr><th>Fuente</th><th style="text-align:right">Q</th><th style="text-align:right">% RBR</th></tr></thead><tbody>';
+  for (const [s,v] of srcTots) {
+    const p = v/D.rbrT*100;
+    sh += `<tr><td>${s==='None'?'sin fuente':s}</td>
+      <td style="text-align:right;color:#888">${fmt(v)}</td>
+      <td style="text-align:right"><span style="color:#FFE600;font-weight:700">${p.toFixed(1)}%</span>
+      <span style="display:inline-block;width:${Math.round(p*2.5)}px;height:5px;background:#FFE600;opacity:.4;vertical-align:middle;border-radius:2px;margin-left:4px"></span></td></tr>`;
+  }
+  document.getElementById('src-table').innerHTML = sh + '</tbody></table>';
+
+  // Matrix
+  const mTypes = TORDER.filter(t => D.matrix[t]);
+  const allVals = mTypes.flatMap(t => D.srcs.map(s => D.matrix[t][s]||0));
+  const maxV = Math.max(...allVals) || 1;
+  let mx = '<table class="hm-table"><thead><tr><th class="hm-rh">Tipo / Fuente</th>'
+    + D.srcs.map(s=>`<th>${s==='None'?'sin fuente':s.replace('geolocation-','geo-').replace('corrections-','corr-')}</th>`).join('')
+    + '<th style="border-left:2px solid #444">Total</th></tr></thead><tbody>';
+  const colTots = {};
+  for (const t of mTypes) {
+    const rowTot = D.srcs.reduce((a,s)=>a+(D.matrix[t][s]||0),0); if (!rowTot) continue;
+    mx += `<tr><td class="hm-rh">${TLABEL[t]||t}</td>`;
+    for (const s of D.srcs) {
+      const v = D.matrix[t][s]||0; colTots[s]=(colTots[s]||0)+v;
+      if (!v){mx+='<td style="color:#252525">-</td>';continue;}
+      const p = v/D.rbrT*100;
+      const intensity = v/maxV;
+      const bg = intensity>.6?'#7B2D00':intensity>.35?'#5C3A00':intensity>.12?'#3A2E00':'#222';
+      const col = intensity>.35?'#FFD700':'#FFE600';
+      mx += `<td style="background:${bg}"><span style="font-weight:800;color:${col}">${p.toFixed(1)}%</span></td>`;
+    }
+    mx += `<td style="border-left:2px solid #444;font-weight:700;color:#FFE600">${(rowTot/D.rbrT*100).toFixed(1)}%</td></tr>`;
+  }
+  mx += '<tr><td class="hm-rh" style="color:#FFE600;font-weight:700">Total</td>'
+    + D.srcs.map(s=>`<td style="border-top:2px solid #444;font-weight:700;color:#FFE600">${((colTots[s]||0)/D.rbrT*100).toFixed(1)}%</td>`).join('')
+    + '<td style="border:2px solid #FFE600;font-weight:800;color:#FFE600">100%</td></tr>';
+  document.getElementById('matrix').innerHTML = mx + '</tbody></table>';
+
+  // Site table
+  let st = '<table><thead><tr><th>Site</th><th style="text-align:right">RBR</th><th style="text-align:right">% ENE site</th><th style="text-align:right">% del RBR</th></tr></thead><tbody>';
+  for (const [site,v] of Object.entries(D.siteCnt).sort((a,b)=>b[1]-a[1])) {
+    const ep = D.siteEne[site] ? (v/D.siteEne[site]*100).toFixed(1)+'%' : '-';
+    st += `<tr><td style="font-weight:700;color:#FFE600">${site}</td>
+      <td style="text-align:right">${fmt(v)}</td>
+      <td style="text-align:right;color:#FF8C00;font-weight:700">${ep}</td>
+      <td style="text-align:right;color:#888">${(v/D.rbrT*100).toFixed(1)}%</td></tr>`;
+  }
+  document.getElementById('site-table').innerHTML = st + '</tbody></table>';
+
+  // Buyer type
+  let bt = '<table><thead><tr><th>Segmento</th><th style="text-align:right">Q</th><th style="text-align:right">% RBR</th></tr></thead><tbody>';
+  for (const b of ['New','L90D','Old']) {
+    const v = D.btCnt[b]||0; if (!v) continue;
+    const col = b==='New'?'#FF4444':b==='L90D'?'#00A650':'#888';
+    bt += `<tr><td style="font-weight:700;color:${col}">${b}</td>
+      <td style="text-align:right">${fmt(v)}</td>
+      <td style="text-align:right;font-weight:700;color:${col}">${(v/D.rbrT*100).toFixed(1)}%</td></tr>`;
+  }
+  document.getElementById('bt-table').innerHTML = bt + '</tbody></table>';
+}
+
+render(RAW.sites['TODOS']);
+</script>
+</body>
+</html>
